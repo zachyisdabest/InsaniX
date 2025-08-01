@@ -1,4 +1,36 @@
--- GUI Setup
+local httpService = game:GetService("HttpService")
+
+-- Settings
+local keyURL = "https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/keys.lua"
+local scriptURL = "https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/mainhub.lua"
+local keySaveFile = "InsaniX_key.txt"
+
+-- Load saved key if exists
+local savedKey = ""
+if pcall(function() return readfile(keySaveFile) end) then
+	savedKey = readfile(keySaveFile)
+end
+
+-- Validate a key
+local function validateKey(key)
+	local success, keys = pcall(function()
+		return loadstring(game:HttpGet(keyURL))()
+	end)
+	return success and table.find(keys, key)
+end
+
+-- Function to launch script
+local function launchHub()
+	loadstring(game:HttpGet(scriptURL))()
+end
+
+-- Check if saved key is valid
+if savedKey ~= "" and validateKey(savedKey) then
+	launchHub()
+	return
+end
+
+-- Show GUI if no valid key
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "InsaniXLoader"
 ScreenGui.ResetOnSpawn = false
@@ -30,6 +62,11 @@ for i, name in ipairs(buttonNames) do
 	btn.TextSize = 18
 	btn.Text = name
 	btn.Parent = Sidebar
+
+	-- Optional: Click response
+	btn.MouseButton1Click:Connect(function()
+		print("Clicked:", name)
+	end)
 end
 
 -- Title Label
@@ -59,11 +96,13 @@ KeyBox.Parent = Frame
 -- License Key Validation
 KeyBox.FocusLost:Connect(function(enterPressed)
 	if enterPressed then
-		local key = KeyBox.Text
-		if key == "your-test-key" then  -- replace with your system later
+		local enteredKey = KeyBox.Text
+
+		if validateKey(enteredKey) then
 			pcall(function()
+				writefile(keySaveFile, enteredKey)
 				ScreenGui:Destroy()
-				loadstring(game:HttpGet("https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/mainhub.lua"))()
+				launchHub()
 			end)
 		else
 			KeyBox.Text = ""
