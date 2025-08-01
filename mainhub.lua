@@ -13,124 +13,64 @@ end
 
 --==[ AUTO-LOAD IF SAVED KEY IS VALID ]==--
 local savedKey = ""
-print("Checking for saved key...")
 if pcall(function() return readfile(keySaveFile) end) then
 	savedKey = readfile(keySaveFile)
-	print("Found saved key:", savedKey)
-else
-	print("No saved key file found.")
 end
 
 if savedKey ~= "" and validateKey(savedKey) then
-	print("✅ Saved key is valid. Launching hub...")
+	-- Valid key found: load main script and exit
 	loadstring(game:HttpGet(scriptURL))()
 	return
-else
-	print("❌ No valid saved key. Showing GUI.")
 end
 
---==[ GUI SETUP ]==--
+--==[ GUI SETUP - ONLY LICENSE KEY INPUT ]==--
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "InsaniXLoader"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = (game:FindFirstChild("CoreGui") or game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"))
 
 local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 500, 0, 340)  -- taller to fit clear key button
-Frame.Position = UDim2.new(0.5, -250, 0.5, -170)
+Frame.Size = UDim2.new(0, 460, 0, 160)
+Frame.Position = UDim2.new(0.5, -230, 0.5, -80)
 Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 Frame.BorderSizePixel = 0
 Frame.Parent = ScreenGui
 
---==[ SIDEBAR ]==--
-local Sidebar = Instance.new("Frame")
-Sidebar.Size = UDim2.new(0, 120, 1, 0)
-Sidebar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-Sidebar.BorderSizePixel = 0
-Sidebar.Parent = Frame
-
---==[ SIDEBAR BUTTONS ]==--
-local buttonNames = {"Main", "ESP", "Stealer", "Extra"}
-for i, name in ipairs(buttonNames) do
-	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(1, -20, 0, 40)
-	btn.Position = UDim2.new(0, 10, 0, 10 + (i - 1) * 45)
-	btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	btn.TextColor3 = Color3.fromRGB(0, 0, 0)
-	btn.Font = Enum.Font.GothamBold
-	btn.TextSize = 18
-	btn.Text = name
-	btn.Parent = Sidebar
-
-	btn.MouseButton1Click:Connect(function()
-		print("🟦 Clicked:", name)
-	end)
-end
-
---==[ TITLE LABEL ]==--
+-- Title Label
 local Label = Instance.new("TextLabel")
 Label.Text = "Enter License Key"
-Label.Size = UDim2.new(0, 360, 0, 40)
-Label.Position = UDim2.new(0, 130, 0, 30)
+Label.Size = UDim2.new(1, -40, 0, 40)
+Label.Position = UDim2.new(0, 20, 0, 20)
 Label.BackgroundTransparency = 1
 Label.TextColor3 = Color3.fromRGB(255, 255, 255)
 Label.Font = Enum.Font.GothamSemibold
-Label.TextSize = 20
+Label.TextSize = 24
 Label.TextXAlignment = Enum.TextXAlignment.Left
 Label.Parent = Frame
 
---==[ KEY INPUT BOX ]==--
+-- Key Input Box
 local KeyBox = Instance.new("TextBox")
 KeyBox.PlaceholderText = "Your license key..."
-KeyBox.Size = UDim2.new(0, 300, 0, 40)
-KeyBox.Position = UDim2.new(0, 130, 0, 80)
+KeyBox.Size = UDim2.new(1, -40, 0, 40)
+KeyBox.Position = UDim2.new(0, 20, 0, 70)
 KeyBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 KeyBox.TextColor3 = Color3.fromRGB(0, 0, 0)
 KeyBox.Font = Enum.Font.Gotham
-KeyBox.TextSize = 16
+KeyBox.TextSize = 18
 KeyBox.ClearTextOnFocus = false
 KeyBox.Parent = Frame
 
---==[ CLEAR SAVED KEY BUTTON ]==--
-local ClearKeyBtn = Instance.new("TextButton")
-ClearKeyBtn.Size = UDim2.new(0, 300, 0, 40)
-ClearKeyBtn.Position = UDim2.new(0, 130, 0, 140)
-ClearKeyBtn.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
-ClearKeyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ClearKeyBtn.Font = Enum.Font.GothamBold
-ClearKeyBtn.TextSize = 18
-ClearKeyBtn.Text = "Clear Saved Key"
-ClearKeyBtn.Parent = Frame
-
-ClearKeyBtn.MouseButton1Click:Connect(function()
-	if pcall(function() return isfile(keySaveFile) end) and isfile(keySaveFile) then
-		pcall(function() 
-			delfile(keySaveFile) 
-		end)
-		print("Saved key deleted.")
-		KeyBox.Text = ""
-		KeyBox.PlaceholderText = "Your license key..."
-	else
-		print("No saved key file to delete.")
-	end
-end)
-
---==[ KEY VALIDATION ]==--
+-- Key validation on Enter or focus lost
 KeyBox.FocusLost:Connect(function(enterPressed)
 	if enterPressed then
 		local enteredKey = KeyBox.Text
-		print("🔍 Checking entered key:", enteredKey)
-
 		if validateKey(enteredKey) then
-			print("✅ Key is valid! Saving and launching.")
 			pcall(function()
 				writefile(keySaveFile, enteredKey)
 			end)
-
 			ScreenGui:Destroy()
 			loadstring(game:HttpGet(scriptURL))()
 		else
-			print("❌ Invalid key entered.")
 			KeyBox.Text = ""
 			KeyBox.PlaceholderText = "❌ Invalid key!"
 		end
