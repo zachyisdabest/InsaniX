@@ -36,8 +36,8 @@ ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = (game:FindFirstChild("CoreGui") or game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"))
 
 local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 500, 0, 300)
-Frame.Position = UDim2.new(0.5, -250, 0.5, -150)
+Frame.Size = UDim2.new(0, 500, 0, 340)  -- taller to fit clear key button
+Frame.Position = UDim2.new(0.5, -250, 0.5, -170)
 Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 Frame.BorderSizePixel = 0
 Frame.Parent = ScreenGui
@@ -90,6 +90,30 @@ KeyBox.Font = Enum.Font.Gotham
 KeyBox.TextSize = 16
 KeyBox.ClearTextOnFocus = false
 KeyBox.Parent = Frame
+
+--==[ CLEAR SAVED KEY BUTTON ]==--
+local ClearKeyBtn = Instance.new("TextButton")
+ClearKeyBtn.Size = UDim2.new(0, 300, 0, 40)
+ClearKeyBtn.Position = UDim2.new(0, 130, 0, 140)
+ClearKeyBtn.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+ClearKeyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ClearKeyBtn.Font = Enum.Font.GothamBold
+ClearKeyBtn.TextSize = 18
+ClearKeyBtn.Text = "Clear Saved Key"
+ClearKeyBtn.Parent = Frame
+
+ClearKeyBtn.MouseButton1Click:Connect(function()
+	if pcall(function() return isfile(keySaveFile) end) and isfile(keySaveFile) then
+		pcall(function() 
+			delfile(keySaveFile) 
+		end)
+		print("Saved key deleted.")
+		KeyBox.Text = ""
+		KeyBox.PlaceholderText = "Your license key..."
+	else
+		print("No saved key file to delete.")
+	end
+end)
 
 --==[ KEY VALIDATION ]==--
 KeyBox.FocusLost:Connect(function(enterPressed)
