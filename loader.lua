@@ -1,117 +1,87 @@
-local scriptURL = "https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/mainhub.lua"
-local keySaveFile = "InsaniX_key.txt"
-local validKeys = {
-    "IX_TEST123",
-    "IX_ABC456",
-    -- Add more keys here
-}
+-- Loader GUI
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
 
--- Function to validate the key
-local function validateKey(key)
-    for _, v in ipairs(validKeys) do
-        if v == key then
-            return true
-        end
-    end
-    return false
-end
+-- Create ScreenGui
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.Name = "InsaniXLoader"
+gui.ResetOnSpawn = false
 
--- Check if key already saved
-local savedKey = ""
-if pcall(function() return readfile(keySaveFile) end) then
-    savedKey = readfile(keySaveFile)
-end
-
-if savedKey ~= "" and validateKey(savedKey) then
-    print("Saved Key is valid, launching hub")
-    
-    -- Show Main GUI after valid key
-    local hubGui = Instance.new("ScreenGui", game.CoreGui)
-    hubGui.Name = "InsaniXHub"
-
-    local hubFrame = Instance.new("Frame", hubGui)
-    hubFrame.Size = UDim2.new(0, 300, 0, 200)
-    hubFrame.Position = UDim2.new(0.5, -150, 0.5, -100)
-    hubFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    hubFrame.BorderSizePixel = 0
-
-    local label = Instance.new("TextLabel", hubFrame)
-    label.Text = "Welcome to InsaniX!"
-    label.Size = UDim2.new(1, 0, 0.3, 0)
-    label.Position = UDim2.new(0, 0, 0, 0)
-    label.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    label.TextColor3 = Color3.fromRGB(255, 255, 255)
-    label.Font = Enum.Font.GothamBold
-    label.TextSize = 22
-
-    return -- Stop script here
-end
-
--- GUI for Key Input
-local gui = Instance.new("ScreenGui", game.CoreGui)
-gui.Name = "InsaniX_KeyGUI"
-
+-- Main Frame
 local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 500, 0, 200)
-frame.Position = UDim2.new(0.5, -250, 0.5, -100)
+frame.Position = UDim2.new(0.5, -150, 0.5, -85)
+frame.Size = UDim2.new(0, 300, 0, 170)
 frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+frame.BackgroundTransparency = 0.3
 frame.BorderSizePixel = 0
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
 
+-- Title
 local title = Instance.new("TextLabel", frame)
-title.Text = "Enter Your InsaniX License Key"
-title.Size = UDim2.new(1, 0, 0.3, 0)
-title.Position = UDim2.new(0, 0, 0, 0)
-title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+title.Size = UDim2.new(1, 0, 0, 30)
+title.Text = "InsaniX Key System"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.BackgroundTransparency = 1
 title.Font = Enum.Font.GothamBold
 title.TextSize = 20
 
-local keyBox = Instance.new("TextBox", frame)
-keyBox.Text = "InsaniX, Best SAB Script!"
-keyBox.ClearTextOnFocus = true
-keyBox.Size = UDim2.new(0, 400, 0, 40)
-keyBox.Position = UDim2.new(0.5, -200, 0, 80)
-keyBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-keyBox.TextColor3 = Color3.fromRGB(0, 0, 0)
-keyBox.Font = Enum.Font.Gotham
-keyBox.TextSize = 18
+-- Key Input
+local box = Instance.new("TextBox", frame)
+box.Position = UDim2.new(0.1, 0, 0.3, 0)
+box.Size = UDim2.new(0.8, 0, 0, 30)
+box.PlaceholderText = "InsaniX, Best SAB Script!"
+box.Text = ""
+box.ClearTextOnFocus = true
+box.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+box.TextColor3 = Color3.fromRGB(255, 255, 255)
+box.Font = Enum.Font.Gotham
+box.TextSize = 14
+Instance.new("UICorner", box).CornerRadius = UDim.new(0, 6)
 
-local submit = Instance.new("TextButton", frame)
-submit.Text = "Submit"
-submit.Size = UDim2.new(0, 120, 0, 40)
-submit.Position = UDim2.new(0.5, -60, 0, 140)
-submit.BackgroundColor3 = Color3.fromRGB(100, 200, 100)
-submit.TextColor3 = Color3.fromRGB(0, 0, 0)
-submit.Font = Enum.Font.GothamBold
-submit.TextSize = 18
+-- Submit Button
+local button = Instance.new("TextButton", frame)
+button.Position = UDim2.new(0.1, 0, 0.55, 0)
+button.Size = UDim2.new(0.8, 0, 0, 30)
+button.Text = "Submit"
+button.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
+button.TextColor3 = Color3.fromRGB(255, 255, 255)
+button.Font = Enum.Font.GothamBold
+button.TextSize = 14
+Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
 
-submit.MouseButton1Click:Connect(function()
-    local enteredKey = keyBox.Text
-    if validateKey(enteredKey) then
-        writefile(keySaveFile, enteredKey)
-        gui:Destroy()
+-- Loading Bar Background
+local barBG = Instance.new("Frame", frame)
+barBG.Position = UDim2.new(0.1, 0, 0.8, 0)
+barBG.Size = UDim2.new(0.8, 0, 0, 20)
+barBG.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+barBG.Visible = false
+Instance.new("UICorner", barBG).CornerRadius = UDim.new(0, 6)
 
-        -- Show Main GUI after validation
-        local hubGui = Instance.new("ScreenGui", game.CoreGui)
-        hubGui.Name = "InsaniXHub"
+-- Loading Bar Fill
+local barFill = Instance.new("Frame", barBG)
+barFill.Size = UDim2.new(0, 0, 1, 0)
+barFill.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
+Instance.new("UICorner", barFill).CornerRadius = UDim.new(0, 6)
 
-        local hubFrame = Instance.new("Frame", hubGui)
-        hubFrame.Size = UDim2.new(0, 300, 0, 200)
-        hubFrame.Position = UDim2.new(0.5, -150, 0.5, -100)
-        hubFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-        hubFrame.BorderSizePixel = 0
+-- Click Event
+button.MouseButton1Click:Connect(function()
+	local key = box.Text
+	if key:sub(1, 3) == "IX_" then
+		writefile("InsaniX_key.txt", key)
+		title.Text = "Welcome to InsaniX"
+		button.Visible = false
+		box.Visible = false
+		barBG.Visible = true
 
-        local label = Instance.new("TextLabel", hubFrame)
-        label.Text = "Welcome to InsaniX!"
-        label.Size = UDim2.new(1, 0, 0.3, 0)
-        label.Position = UDim2.new(0, 0, 0, 0)
-        label.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-        label.TextColor3 = Color3.fromRGB(255, 255, 255)
-        label.Font = Enum.Font.GothamBold
-        label.TextSize = 22
-    else
-        submit.Text = "Invalid Key!"
-        wait(1)
-        submit.Text = "Submit"
-    end
+		-- Animate the bar fill over 5 seconds
+		for i = 1, 100 do
+			barFill.Size = UDim2.new(i / 100, 0, 1, 0)
+			wait(0.05) -- 100 * 0.05 = 5 seconds
+		end
+
+		gui:Destroy()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/mainhub.lua"))()
+	else
+		title.Text = "Invalid Key!"
+	end
 end)
