@@ -1,89 +1,103 @@
--- mainhub.lua
+-- // InsaniX GUI - Preview Layout Based on Screenshot
+
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
-
--- Create ScreenGui
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "InsaniXMainHub"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = player:WaitForChild("PlayerGui")
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.Name = "InsaniX_GUI"
+gui.ResetOnSpawn = false
 
 -- Main Frame
-local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 500, 0, 350)
-Frame.Position = UDim2.new(0.5, -250, 0.5, -175)
-Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-Frame.BorderSizePixel = 0
-Frame.Parent = ScreenGui
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.new(0, 600, 0, 350)
+main.Position = UDim2.new(0.5, -300, 0.5, -175)
+main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+main.BackgroundTransparency = 0.2
+main.BorderSizePixel = 0
+main.ClipsDescendants = true
+main.Name = "MainFrame"
+main.Active = true
+main.Draggable = true
+main.AnchorPoint = Vector2.new(0.5, 0.5)
+main.ZIndex = 1
+main.AutoLocalize = false
 
--- Sidebar
-local Sidebar = Instance.new("Frame")
-Sidebar.Size = UDim2.new(0, 120, 1, 0)
-Sidebar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-Sidebar.BorderSizePixel = 0
-Sidebar.Parent = Frame
+-- Left Sidebar
+local sidebar = Instance.new("Frame", main)
+sidebar.Size = UDim2.new(0, 150, 1, 0)
+sidebar.Position = UDim2.new(0, 0, 0, 0)
+sidebar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+sidebar.BackgroundTransparency = 0.3
+sidebar.BorderSizePixel = 0
 
--- Sidebar Buttons
-local buttonNames = {"Main", "ESP", "Stealer", "Extra"}
-local buttons = {}
-for i, name in ipairs(buttonNames) do
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, -20, 0, 40)
-    btn.Position = UDim2.new(0, 10, 0, 10 + (i - 1) * 45)
-    btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextColor3 = Color3.fromRGB(0, 0, 0)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 18
-    btn.Text = name
-    btn.Parent = Sidebar
-    buttons[name] = btn
+local tabs = {
+    "Steal Tab", "Buy Tab", "Server Hop Tab", "Webhook Tab",
+    "Player Tab", "Esp Tab", "Window and File Configuration", "Job Id", "Window"
+}
+
+for i, name in ipairs(tabs) do
+    local button = Instance.new("TextButton", sidebar)
+    button.Size = UDim2.new(1, 0, 0, 30)
+    button.Position = UDim2.new(0, 0, 0, (i - 1) * 32)
+    button.BackgroundTransparency = 1
+    button.TextColor3 = Color3.fromRGB(200, 200, 200)
+    button.Font = Enum.Font.Gotham
+    button.TextSize = 14
+    button.Text = name
 end
 
--- Title Label
-local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Text = "Welcome to InsaniX!"
-TitleLabel.Size = UDim2.new(0, 360, 0, 40)
-TitleLabel.Position = UDim2.new(0, 130, 0, 20)
-TitleLabel.BackgroundTransparency = 1
-TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleLabel.Font = Enum.Font.GothamSemibold
-TitleLabel.TextSize = 24
-TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-TitleLabel.Parent = Frame
+-- Right Content Frame
+local content = Instance.new("Frame", main)
+content.Size = UDim2.new(1, -160, 1, -20)
+content.Position = UDim2.new(0, 160, 0, 10)
+content.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+content.BackgroundTransparency = 0.2
+content.BorderSizePixel = 0
 
--- Content Frame (for page content)
-local ContentFrame = Instance.new("Frame")
-ContentFrame.Size = UDim2.new(0, 360, 0, 250)
-ContentFrame.Position = UDim2.new(0, 130, 0, 70)
-ContentFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-ContentFrame.BorderSizePixel = 0
-ContentFrame.Parent = Frame
+-- Function to create toggle entries
+local function createFeature(text, desc, positionY)
+    local item = Instance.new("Frame", content)
+    item.Size = UDim2.new(1, -20, 0, 60)
+    item.Position = UDim2.new(0, 10, 0, positionY)
+    item.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    item.BackgroundTransparency = 0.3
+    item.BorderSizePixel = 0
 
--- Content Label (shows which page)
-local ContentLabel = Instance.new("TextLabel")
-ContentLabel.Size = UDim2.new(1, -20, 1, -20)
-ContentLabel.Position = UDim2.new(0, 10, 0, 10)
-ContentLabel.BackgroundTransparency = 1
-ContentLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-ContentLabel.Font = Enum.Font.Gotham
-ContentLabel.TextSize = 20
-ContentLabel.TextWrapped = true
-ContentLabel.Text = "Select a tab from the sidebar."
-ContentLabel.Parent = ContentFrame
+    local title = Instance.new("TextLabel", item)
+    title.Text = text
+    title.Font = Enum.Font.GothamSemibold
+    title.TextSize = 16
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.BackgroundTransparency = 1
+    title.Position = UDim2.new(0, 10, 0, 5)
+    title.Size = UDim2.new(1, -60, 0, 20)
+    title.TextXAlignment = Enum.TextXAlignment.Left
 
--- Button Click Handlers to update content label text
-buttons.Main.MouseButton1Click:Connect(function()
-    ContentLabel.Text = "Main tab selected. Put your main script options here."
-end)
+    local description = Instance.new("TextLabel", item)
+    description.Text = desc or ""
+    description.Font = Enum.Font.Gotham
+    description.TextSize = 12
+    description.TextColor3 = Color3.fromRGB(200, 200, 200)
+    description.BackgroundTransparency = 1
+    description.Position = UDim2.new(0, 10, 0, 25)
+    description.Size = UDim2.new(1, -60, 0, 30)
+    description.TextWrapped = true
+    description.TextXAlignment = Enum.TextXAlignment.Left
 
-buttons.ESP.MouseButton1Click:Connect(function()
-    ContentLabel.Text = "ESP tab selected. Add your ESP features here."
-end)
+    local toggle = Instance.new("TextButton", item)
+    toggle.Text = "⚙️"
+    toggle.Size = UDim2.new(0, 30, 0, 30)
+    toggle.Position = UDim2.new(1, -40, 0.5, -15)
+    toggle.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    toggle.BorderSizePixel = 0
+    toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    toggle.Font = Enum.Font.GothamBold
+    toggle.TextSize = 18
+    toggle.BackgroundTransparency = 0.2
+end
 
-buttons.Stealer.MouseButton1Click:Connect(function()
-    ContentLabel.Text = "Stealer tab selected. Add stealer options here."
-end)
-
-buttons.Extra.MouseButton1Click:Connect(function()
-    ContentLabel.Text = "Extra tab selected. Add extra features here."
-end)
+-- Sample Feature List
+createFeature("Aimbot with Webslinger", "", 0)
+createFeature("Anti Traps", "", 65)
+createFeature("Anti Hit", "Prevents hits using webslinger, medusa head can still affect you", 130)
+createFeature("Speed Boost req(750 cash)", "", 195)
+createFeature("Infinite Jump", "", 260)
