@@ -1,141 +1,139 @@
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
-local ESPEnabled = false
-local ESPBoxes = {}
 
--- Create main GUI
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "InsaniXMainHub"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
+-- Sidebar (Tabs)
 local Sidebar = Instance.new("Frame")
-Sidebar.Size = UDim2.new(0, 200, 1, 0)
+Sidebar.Size = UDim2.new(0, 150, 1, 0)
 Sidebar.Position = UDim2.new(0, 0, 0, 0)
-Sidebar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Sidebar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 Sidebar.BorderSizePixel = 0
 Sidebar.Parent = ScreenGui
 
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 50)
-Title.BackgroundTransparency = 1
-Title.Text = "InsaniX Hub"
-Title.TextColor3 = Color3.new(1,1,1)
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 24
-Title.Parent = Sidebar
+local UICornerSidebar = Instance.new("UICorner")
+UICornerSidebar.CornerRadius = UDim.new(0, 6)
+UICornerSidebar.Parent = Sidebar
 
-local ESPToggle = Instance.new("TextButton")
-ESPToggle.Size = UDim2.new(0.8, 0, 0, 40)
-ESPToggle.Position = UDim2.new(0.1, 0, 0, 60)
-ESPToggle.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
-ESPToggle.TextColor3 = Color3.new(1,1,1)
-ESPToggle.Font = Enum.Font.GothamBold
-ESPToggle.TextSize = 18
-ESPToggle.Text = "Toggle Player ESP"
-ESPToggle.Parent = Sidebar
-ESPToggle.AutoButtonColor = true
-ESPToggle.TextWrapped = true
+local Tabs = {"Player Management", "Player Tab", "ESP Tab"}
+local tabButtons = {}
+local currentTab = nil
 
--- Function to create ESP box and name label
-local function createESPForPlayer(player)
-    if ESPBoxes[player] then return end -- Already created
+-- Content Frame (right side)
+local ContentFrame = Instance.new("Frame")
+ContentFrame.Size = UDim2.new(1, -150, 1, 0)
+ContentFrame.Position = UDim2.new(0, 150, 0, 0)
+ContentFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+ContentFrame.BorderSizePixel = 0
+ContentFrame.Parent = ScreenGui
 
-    local box = Drawing.new("Square")
-    box.Visible = false
-    box.Color = Color3.fromRGB(60, 120, 255)
-    box.Thickness = 2
-    box.Filled = false
+local UICornerContent = Instance.new("UICorner")
+UICornerContent.CornerRadius = UDim.new(0, 6)
+UICornerContent.Parent = ContentFrame
 
-    local nameLabel = Drawing.new("Text")
-    nameLabel.Visible = false
-    nameLabel.Color = Color3.fromRGB(255, 255, 255)
-    nameLabel.Text = player.Name
-    nameLabel.Size = 14
-    nameLabel.Center = true
-    nameLabel.Outline = true
+-- Helper function to create toggle buttons
+local function createToggle(parent, text, position, callback)
+    local toggleFrame = Instance.new("Frame")
+    toggleFrame.Size = UDim2.new(1, -20, 0, 40)
+    toggleFrame.Position = position
+    toggleFrame.BackgroundTransparency = 1
+    toggleFrame.Parent = parent
 
-    ESPBoxes[player] = {
-        Box = box,
-        NameLabel = nameLabel,
-    }
+    local label = Instance.new("TextLabel")
+    label.Text = text
+    label.TextColor3 = Color3.new(1,1,1)
+    label.Font = Enum.Font.Gotham
+    label.TextSize = 16
+    label.BackgroundTransparency = 1
+    label.Size = UDim2.new(0.7, 0, 1, 0)
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = toggleFrame
+
+    local toggleButton = Instance.new("TextButton")
+    toggleButton.Size = UDim2.new(0, 50, 0, 25)
+    toggleButton.Position = UDim2.new(0.75, 0, 0.15, 0)
+    toggleButton.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
+    toggleButton.TextColor3 = Color3.new(1,1,1)
+    toggleButton.Text = "Off"
+    toggleButton.Font = Enum.Font.GothamBold
+    toggleButton.TextSize = 14
+    toggleButton.Parent = toggleFrame
+    toggleButton.AutoButtonColor = true
+
+    local toggled = false
+    toggleButton.MouseButton1Click:Connect(function()
+        toggled = not toggled
+        toggleButton.Text = toggled and "On" or "Off"
+        toggleButton.BackgroundColor3 = toggled and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(60, 120, 255)
+        callback(toggled)
+    end)
 end
 
--- Remove ESP when player leaves
-Players.PlayerRemoving:Connect(function(player)
-    if ESPBoxes[player] then
-        ESPBoxes[player].Box:Remove()
-        ESPBoxes[player].NameLabel:Remove()
-        ESPBoxes[player] = nil
-    end
-end)
+-- Create tabs buttons on sidebar
+for i, tabName in ipairs(Tabs) do
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(1, 0, 0, 50)
+    button.Position = UDim2.new(0, 0, 0, (i-1)*50)
+    button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    button.Text = tabName
+    button.TextColor3 = Color3.new(1,1,1)
+    button.Font = Enum.Font.GothamBold
+    button.TextSize = 16
+    button.Parent = Sidebar
+    button.AutoButtonColor = true
 
--- Create ESP for all players initially
-for _, player in pairs(Players:GetPlayers()) do
-    if player ~= LocalPlayer then
-        createESPForPlayer(player)
-    end
-end
-
--- Also create ESP for new players
-Players.PlayerAdded:Connect(function(player)
-    if player ~= LocalPlayer then
-        createESPForPlayer(player)
-    end
-end)
-
--- Update ESP every frame
-RunService.RenderStepped:Connect(function()
-    if not ESPEnabled then
-        for _, esp in pairs(ESPBoxes) do
-            esp.Box.Visible = false
-            esp.NameLabel.Visible = false
-        end
-        return
-    end
-
-    local camera = workspace.CurrentCamera
-    for player, esp in pairs(ESPBoxes) do
-        local character = player.Character
-        local head = character and character:FindFirstChild("Head")
-        local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-
-        if head and humanoid and humanoid.Health > 0 then
-            local pos, onScreen = camera:WorldToViewportPoint(head.Position)
-            if onScreen then
-                local size = Vector3.new(4, 6, 0) -- rough box size
-
-                local bottomPos, bottomOnScreen = camera:WorldToViewportPoint(head.Position - Vector3.new(0, 3, 0))
-
-                if bottomOnScreen then
-                    local height = math.abs(pos.Y - bottomPos.Y)
-                    local width = height / 2
-
-                    esp.Box.Position = Vector2.new(pos.X - width / 2, pos.Y - height / 2)
-                    esp.Box.Size = Vector2.new(width, height)
-                    esp.Box.Visible = true
-
-                    esp.NameLabel.Position = Vector2.new(pos.X, pos.Y - height / 2 - 15)
-                    esp.NameLabel.Text = player.Name
-                    esp.NameLabel.Visible = true
-                else
-                    esp.Box.Visible = false
-                    esp.NameLabel.Visible = false
-                end
-            else
-                esp.Box.Visible = false
-                esp.NameLabel.Visible = false
+    button.MouseButton1Click:Connect(function()
+        -- Clear content
+        for _, child in ipairs(ContentFrame:GetChildren()) do
+            if not (child:IsA("UIListLayout") or child:IsA("UIPadding")) then
+                child:Destroy()
             end
-        else
-            esp.Box.Visible = false
-            esp.NameLabel.Visible = false
         end
-    end
-end)
 
--- Toggle ESP on button click
-ESPToggle.MouseButton1Click:Connect(function()
-    ESPEnabled = not ESPEnabled
-    ESPToggle.Text = ESPEnabled and "Disable Player ESP" or "Enable Player ESP"
-end)
+        -- Highlight selected button
+        for _, btn in pairs(tabButtons) do
+            btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        end
+        button.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
+
+        -- Show content based on tab
+        if tabName == "Player Management" then
+            createToggle(ContentFrame, "Aimbot with Webslinger", UDim2.new(0, 10, 0, 10), function(state)
+                print("Aimbot toggled", state)
+                -- Implement your aimbot logic here
+            end)
+
+            createToggle(ContentFrame, "Anti Traps", UDim2.new(0, 10, 0, 60), function(state)
+                print("Anti Traps toggled", state)
+                -- Implement your anti traps logic here
+            end)
+
+        elseif tabName == "Player Tab" then
+            createToggle(ContentFrame, "Anti Hit", UDim2.new(0, 10, 0, 10), function(state)
+                print("Anti Hit toggled", state)
+            end)
+
+            createToggle(ContentFrame, "Speed Boost (req 750 cash)", UDim2.new(0, 10, 0, 60), function(state)
+                print("Speed Boost toggled", state)
+            end)
+
+        elseif tabName == "ESP Tab" then
+            createToggle(ContentFrame, "Player ESP", UDim2.new(0, 10, 0, 10), function(state)
+                print("Player ESP toggled", state)
+                -- Here you can link to your ESP code to enable/disable
+            end)
+
+            createToggle(ContentFrame, "Infinite Jump", UDim2.new(0, 10, 0, 60), function(state)
+                print("Infinite Jump toggled", state)
+            end)
+        end
+    end)
+
+    table.insert(tabButtons, button)
+end
+
+-- Trigger first tab by default
+tabButtons[1].MouseButton1Click:Wait()
