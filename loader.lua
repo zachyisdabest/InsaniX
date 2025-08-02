@@ -1,6 +1,7 @@
 -- Loader GUI
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
+local HttpService = game:GetService("HttpService")
 
 -- Fetch valid keys from remote
 local validKeys = {}
@@ -43,7 +44,7 @@ title.TextSize = 20
 local box = Instance.new("TextBox", frame)
 box.Position = UDim2.new(0.1, 0, 0.3, 0)
 box.Size = UDim2.new(0.8, 0, 0, 30)
-box.PlaceholderText = "InsaniX, Best SAB Script!"
+box.PlaceholderText = "Enter your key here"
 box.Text = ""
 box.ClearTextOnFocus = true
 box.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
@@ -77,9 +78,10 @@ barFill.Size = UDim2.new(0, 0, 1, 0)
 barFill.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
 Instance.new("UICorner", barFill).CornerRadius = UDim.new(0, 6)
 
--- Click Event
+-- Submit Button Logic
 button.MouseButton1Click:Connect(function()
     local key = box.Text
+
     if validKeys[key] then
         writefile("InsaniX_key.txt", key)
         title.Text = "Welcome to InsaniX"
@@ -87,10 +89,17 @@ button.MouseButton1Click:Connect(function()
         box.Visible = false
         barBG.Visible = true
 
-        -- Animate the bar fill over 5 seconds
-        for i = 1, 100 do
+        -- Animate loading bar with a pause at 70%
+        for i = 1, 70 do
             barFill.Size = UDim2.new(i / 100, 0, 1, 0)
-            wait(0.05) -- 100 * 0.05 = 5 seconds
+            wait(0.05)
+        end
+
+        wait(0.7) -- Pause for 0.7 seconds at 70%
+
+        for i = 71, 100 do
+            barFill.Size = UDim2.new(i / 100, 0, 1, 0)
+            wait(0.05)
         end
 
         gui:Destroy()
