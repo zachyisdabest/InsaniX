@@ -1,98 +1,90 @@
--- GUI + License System Script for InsaniX
+-- CONFIG
+local keySaveFile = "InsaniX_key.txt"
+local scriptURL = "https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/mainhub.lua"
 
--- Services
-local Players = game:GetService("Players")
-local HttpService = game:GetService("HttpService")
-local player = Players.LocalPlayer
-
--- Key Settings
-local savedKeyFile = "InsaniX_key.txt"
-local validKeysURL = "https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/keys.txt"
-local mainScriptURL = "https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/mainhub.lua"
-
--- Check for Saved Key
-local savedKey
-if isfile and isfile(savedKeyFile) then
-	savedKey = readfile(savedKeyFile)
-end
-
--- Function to Validate Key
+-- KEY VALIDATION FUNCTION (replace with your own logic if needed)
 local function validateKey(key)
-	local success, response = pcall(function()
-		return game:HttpGet(validKeysURL)
-	end)
-
-	if success and response then
-		for line in response:gmatch("[^\r\n]+") do
-			if line == key then
-				return true
-			end
-		end
-	end
-	return false
+	return string.sub(key, 1, 3) == "IX_"
 end
 
--- If key is valid, load main script
-if savedKey and validateKey(savedKey) then
-	print("✅ Saved Key is valid, launching hub")
-	loadstring(game:HttpGet(mainScriptURL))()
-	return
+-- Load saved key
+local savedKey = ""
+if pcall(function() return readfile(keySaveFile) end) then
+	savedKey = readfile(keySaveFile)
 end
 
--- GUI Setup
+-- Auto-run if key is already saved and valid
+if savedKey ~= "" and validateKey(savedKey) then
+    print("Saved Key is valid, launching hub")
+    loadstring(game:HttpGet(scriptURL))()
+    return
+end
+
+-- UI Setup
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "InsaniXLoader"
+ScreenGui.Name = "InsaniX_GUI"
 ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = (game:FindFirstChild("CoreGui") or player:WaitForChild("PlayerGui"))
+ScreenGui.Parent = game:GetService("CoreGui")
 
 local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 500, 0, 200)
-Frame.Position = UDim2.new(0.5, -250, 0.5, -100)
+Frame.Size = UDim2.new(0, 300, 0, 160)
+Frame.Position = UDim2.new(0.5, -150, 0.5, -80)
 Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 Frame.BorderSizePixel = 0
 Frame.Parent = ScreenGui
 
-local Label = Instance.new("TextLabel")
-Label.Text = "Enter License Key"
-Label.Size = UDim2.new(1, 0, 0, 40)
-Label.Position = UDim2.new(0, 0, 0, 20)
-Label.BackgroundTransparency = 1
-Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-Label.Font = Enum.Font.GothamSemibold
-Label.TextSize = 22
-Label.Parent = Frame
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Text = "🔑 Enter Your InsaniX Key"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 22
+Title.Parent = Frame
 
-local KeyBox = Instance.new("TextBox")
-KeyBox.PlaceholderText = "Your license key..."
-KeyBox.Size = UDim2.new(0, 300, 0, 40)
-KeyBox.Position = UDim2.new(0.5, -150, 0, 70)
-KeyBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-KeyBox.TextColor3 = Color3.fromRGB(0, 0, 0)
-KeyBox.Font = Enum.Font.Gotham
-KeyBox.TextSize = 18
-KeyBox.ClearTextOnFocus = false
-KeyBox.Parent = Frame
+local TextBox = Instance.new("TextBox")
+TextBox.PlaceholderText = "Enter key here (starts with IX_)"
+TextBox.Size = UDim2.new(0.9, 0, 0, 35)
+TextBox.Position = UDim2.new(0.05, 0, 0, 55)
+TextBox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextBox.BorderSizePixel = 0
+TextBox.Font = Enum.Font.SourceSans
+TextBox.TextSize = 20
+TextBox.Parent = Frame
 
--- Submit Button
-local SubmitBtn = Instance.new("TextButton")
-SubmitBtn.Size = UDim2.new(0, 100, 0, 40)
-SubmitBtn.Position = UDim2.new(0.5, -50, 0, 120)
-SubmitBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-SubmitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-SubmitBtn.Font = Enum.Font.GothamBold
-SubmitBtn.TextSize = 18
-SubmitBtn.Text = "Submit"
-SubmitBtn.Parent = Frame
+local Submit = Instance.new("TextButton")
+Submit.Text = "Submit Key"
+Submit.Size = UDim2.new(0.9, 0, 0, 35)
+Submit.Position = UDim2.new(0.05, 0, 0, 100)
+Submit.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+Submit.TextColor3 = Color3.fromRGB(255, 255, 255)
+Submit.BorderSizePixel = 0
+Submit.Font = Enum.Font.SourceSansBold
+Submit.TextSize = 20
+Submit.Parent = Frame
 
-SubmitBtn.MouseButton1Click:Connect(function()
-	local enteredKey = KeyBox.Text
-	if enteredKey and validateKey(enteredKey) then
-		writefile(savedKeyFile, enteredKey)
-		print("✅ Key accepted. Loading hub...")
+local Message = Instance.new("TextLabel")
+Message.Size = UDim2.new(1, 0, 0, 20)
+Message.Position = UDim2.new(0, 0, 1, -20)
+Message.Text = ""
+Message.TextColor3 = Color3.fromRGB(255, 255, 255)
+Message.TextTransparency = 0.2
+Message.BackgroundTransparency = 1
+Message.Font = Enum.Font.SourceSans
+Message.TextSize = 18
+Message.Parent = Frame
+
+-- Submit button behavior
+Submit.MouseButton1Click:Connect(function()
+	local key = TextBox.Text
+	if validateKey(key) then
+		writefile(keySaveFile, key)
+		Message.Text = "✅ Key accepted! Loading..."
+		wait(1)
 		ScreenGui:Destroy()
-		loadstring(game:HttpGet(mainScriptURL))()
+		loadstring(game:HttpGet(scriptURL))()
 	else
-		KeyBox.Text = ""
-		KeyBox.PlaceholderText = "❌ Invalid key!"
+		Message.Text = "❌ Invalid key. Try again."
 	end
 end)
