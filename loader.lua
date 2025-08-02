@@ -2,6 +2,20 @@
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
+-- Fetch valid keys from remote
+local validKeys = {}
+local success, result = pcall(function()
+    return game:HttpGet("https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/keys.txt")
+end)
+
+if success then
+    for key in string.gmatch(result, "[^\r\n]+") do
+        validKeys[key] = true
+    end
+else
+    warn("Failed to fetch keys.txt from server")
+end
+
 -- Create ScreenGui
 local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 gui.Name = "InsaniXLoader"
@@ -63,45 +77,25 @@ barFill.Size = UDim2.new(0, 0, 1, 0)
 barFill.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
 Instance.new("UICorner", barFill).CornerRadius = UDim.new(0, 6)
 
---Key Validation
-local validKeys = {}
-local success, result = pcall(function()
-    return game:HttpGet("https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/keys.txt")
-end)
-
-if success then
-    for key in string.gmatch(result, "[^\r\n]+") do
-        validKeys[key] = true
-    end
-end
-
--- Then in your Submit button logic, change this:
-if validKeys[enteredKey] then
-    -- proceed
-else
-    -- invalid key
-end
-
-
 -- Click Event
 button.MouseButton1Click:Connect(function()
-	local key = box.Text
-	if key:sub(1, 3) == "IX_" then
-		writefile("InsaniX_key.txt", key)
-		title.Text = "Welcome to InsaniX"
-		button.Visible = false
-		box.Visible = false
-		barBG.Visible = true
+    local key = box.Text
+    if validKeys[key] then
+        writefile("InsaniX_key.txt", key)
+        title.Text = "Welcome to InsaniX"
+        button.Visible = false
+        box.Visible = false
+        barBG.Visible = true
 
-		-- Animate the bar fill over 5 seconds
-		for i = 1, 100 do
-			barFill.Size = UDim2.new(i / 100, 0, 1, 0)
-			wait(0.05) -- 100 * 0.05 = 5 seconds
-		end
+        -- Animate the bar fill over 5 seconds
+        for i = 1, 100 do
+            barFill.Size = UDim2.new(i / 100, 0, 1, 0)
+            wait(0.05) -- 100 * 0.05 = 5 seconds
+        end
 
-		gui:Destroy()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/mainhub.lua"))()
-	else
-		title.Text = "Invalid Key!"
-	end
+        gui:Destroy()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/mainhub.lua"))()
+    else
+        title.Text = "Invalid Key!"
+    end
 end)
