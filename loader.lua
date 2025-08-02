@@ -7,25 +7,26 @@ local function loadMainHub()
 end
 
 -- Try to load saved key
-local success, savedKey = pcall(function()
+local hasValidKey = false
+local savedKey = ""
+
+local success, result = pcall(function()
     return readfile("InsaniX_key.txt")
 end)
 
-if success and savedKey and savedKey ~= "" then
-    -- Key exists, skip loader GUI and run mainhub immediately
-    loadMainHub()
-    return
+if success and result and result ~= "" then
+    savedKey = result:gsub("%s+", "")
+    hasValidKey = true
 end
 
--- Otherwise, show loader GUI and validate keys as usual
 -- Fetch valid keys from remote
 local validKeys = {}
-local successFetch, result = pcall(function()
+local successFetch, keyList = pcall(function()
     return game:HttpGet("https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/keys.txt")
 end)
 
 if successFetch then
-    for key in string.gmatch(result, "[^\r\n]+") do
+    for key in string.gmatch(keyList, "[^\r\n]+") do
         key = key:gsub("%s+", "") -- trim whitespace
         validKeys[key] = true
     end
@@ -33,7 +34,13 @@ else
     warn("Failed to fetch keys.txt from server")
 end
 
--- Create GUI
+-- If saved key is valid, skip GUI and load hub
+if hasValidKey and validKeys[savedKey] then
+    loadMainHub()
+    return
+end
+
+-- Otherwise, show loader GUI
 local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 gui.Name = "InsaniXLoader"
 gui.ResetOnSpawn = false
@@ -89,7 +96,7 @@ barFill.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
 Instance.new("UICorner", barFill).CornerRadius = UDim.new(0, 6)
 
 button.MouseButton1Click:Connect(function()
-    local key = box.Text:gsub("^%s*(.-)%s*$", "%1") -- trim spaces
+    local key = box.Text:gsub("^%s*(.-)%s*$", "%1")
 
     if validKeys[key] then
         writefile("InsaniX_key.txt", key)
@@ -98,7 +105,7 @@ button.MouseButton1Click:Connect(function()
         box.Visible = false
         barBG.Visible = true
 
-        -- Loading bar animation with pause
+        -- Loading bar animation
         for i = 1, 70 do
             barFill.Size = UDim2.new(i / 100, 0, 1, 0)
             wait(0.05)
