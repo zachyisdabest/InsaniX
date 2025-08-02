@@ -120,7 +120,11 @@ button.MouseButton1Click:Connect(function()
 
         gui:Destroy()
         loadMainHub()
-    else
-        title.Text = "Invalid Key!"
-    end
-end)
+else
+    title.Text = "Invalid Key! Try again."
+    box.Text = "" -- Clear the box for retry
+    task.delay(2, function()
+        title.Text = "InsaniX Key System"
+    end)
+end
+
