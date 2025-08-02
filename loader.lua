@@ -63,6 +63,26 @@ barFill.Size = UDim2.new(0, 0, 1, 0)
 barFill.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
 Instance.new("UICorner", barFill).CornerRadius = UDim.new(0, 6)
 
+--Key Validation
+local validKeys = {}
+local success, result = pcall(function()
+    return game:HttpGet("https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/keys.txt")
+end)
+
+if success then
+    for key in string.gmatch(result, "[^\r\n]+") do
+        validKeys[key] = true
+    end
+end
+
+-- Then in your Submit button logic, change this:
+if validKeys[enteredKey] then
+    -- proceed
+else
+    -- invalid key
+end
+
+
 -- Click Event
 button.MouseButton1Click:Connect(function()
 	local key = box.Text
