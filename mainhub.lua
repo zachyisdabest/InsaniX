@@ -1,99 +1,89 @@
--- Services
-local HttpService = game:GetService("HttpService")
+-- mainhub.lua
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
--- Saved Key File Name
-local KEY_FILE = "InsaniX_key.txt"
-
--- Your Valid Keys List (for demo, replace with actual server call if needed)
-local VALID_KEYS = {
-    ["your-test-key"] = true,
-    ["another-valid-key"] = true,
-}
-
--- Function to Validate Key
-local function isValidKey(key)
-    return VALID_KEYS[key] ~= nil
-end
-
--- Try to read the saved key
-local savedKey
-pcall(function()
-    if isfile(KEY_FILE) then
-        savedKey = readfile(KEY_FILE)
-    end
-end)
-
--- If valid saved key exists, launch hub
-if savedKey and isValidKey(savedKey) then
-    print("Saved Key is valid, launching hub")
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/mainhub.lua"))()
-    return
-end
-
--- GUI Setup
+-- Create ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "InsaniXLoader"
+ScreenGui.Name = "InsaniXMainHub"
 ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = game:FindFirstChild("CoreGui") or player:WaitForChild("PlayerGui")
+ScreenGui.Parent = player:WaitForChild("PlayerGui")
 
+-- Main Frame
 local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 500, 0, 200)
-Frame.Position = UDim2.new(0.5, -250, 0.5, -100)
+Frame.Size = UDim2.new(0, 500, 0, 350)
+Frame.Position = UDim2.new(0.5, -250, 0.5, -175)
 Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 Frame.BorderSizePixel = 0
 Frame.Parent = ScreenGui
 
+-- Sidebar
+local Sidebar = Instance.new("Frame")
+Sidebar.Size = UDim2.new(0, 120, 1, 0)
+Sidebar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+Sidebar.BorderSizePixel = 0
+Sidebar.Parent = Frame
+
+-- Sidebar Buttons
+local buttonNames = {"Main", "ESP", "Stealer", "Extra"}
+local buttons = {}
+for i, name in ipairs(buttonNames) do
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -20, 0, 40)
+    btn.Position = UDim2.new(0, 10, 0, 10 + (i - 1) * 45)
+    btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextColor3 = Color3.fromRGB(0, 0, 0)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 18
+    btn.Text = name
+    btn.Parent = Sidebar
+    buttons[name] = btn
+end
+
 -- Title Label
-local Label = Instance.new("TextLabel")
-Label.Text = "Enter License Key"
-Label.Size = UDim2.new(1, 0, 0, 40)
-Label.Position = UDim2.new(0, 0, 0, 20)
-Label.BackgroundTransparency = 1
-Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-Label.Font = Enum.Font.GothamSemibold
-Label.TextSize = 22
-Label.Parent = Frame
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Text = "Welcome to InsaniX!"
+TitleLabel.Size = UDim2.new(0, 360, 0, 40)
+TitleLabel.Position = UDim2.new(0, 130, 0, 20)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.Font = Enum.Font.GothamSemibold
+TitleLabel.TextSize = 24
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+TitleLabel.Parent = Frame
 
--- Key Input Box
--- Key Input Box
-local KeyBox = Instance.new("TextBox")
-KeyBox.Text = "InsaniX, Best SAB Script!"
-KeyBox.ClearTextOnFocus = true
-KeyBox.Size = UDim2.new(0, 400, 0, 40)
-KeyBox.Position = UDim2.new(0.5, -200, 0, 80)
-KeyBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-KeyBox.TextColor3 = Color3.fromRGB(0, 0, 0)
-KeyBox.Font = Enum.Font.Gotham
-KeyBox.TextSize = 18
-KeyBox.Parent = Frame
+-- Content Frame (for page content)
+local ContentFrame = Instance.new("Frame")
+ContentFrame.Size = UDim2.new(0, 360, 0, 250)
+ContentFrame.Position = UDim2.new(0, 130, 0, 70)
+ContentFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+ContentFrame.BorderSizePixel = 0
+ContentFrame.Parent = Frame
 
+-- Content Label (shows which page)
+local ContentLabel = Instance.new("TextLabel")
+ContentLabel.Size = UDim2.new(1, -20, 1, -20)
+ContentLabel.Position = UDim2.new(0, 10, 0, 10)
+ContentLabel.BackgroundTransparency = 1
+ContentLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+ContentLabel.Font = Enum.Font.Gotham
+ContentLabel.TextSize = 20
+ContentLabel.TextWrapped = true
+ContentLabel.Text = "Select a tab from the sidebar."
+ContentLabel.Parent = ContentFrame
 
--- Confirm Button
-local ConfirmBtn = Instance.new("TextButton")
-ConfirmBtn.Size = UDim2.new(0, 140, 0, 35)
-ConfirmBtn.Position = UDim2.new(0.5, -70, 0, 140)
-ConfirmBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-ConfirmBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ConfirmBtn.Font = Enum.Font.GothamBold
-ConfirmBtn.TextSize = 18
-ConfirmBtn.Text = "Submit Key"
-ConfirmBtn.Parent = Frame
+-- Button Click Handlers to update content label text
+buttons.Main.MouseButton1Click:Connect(function()
+    ContentLabel.Text = "Main tab selected. Put your main script options here."
+end)
 
-ConfirmBtn.MouseButton1Click:Connect(function()
-    local key = KeyBox.Text
-    if isValidKey(key) then
-        -- Save the key
-        pcall(function()
-            writefile(KEY_FILE, key)
-        end)
+buttons.ESP.MouseButton1Click:Connect(function()
+    ContentLabel.Text = "ESP tab selected. Add your ESP features here."
+end)
 
-        -- Clean up UI and launch
-        ScreenGui:Destroy()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/mainhub.lua"))()
-    else
-        KeyBox.Text = ""
-        KeyBox.PlaceholderText = "❌ Invalid key!"
-    end
+buttons.Stealer.MouseButton1Click:Connect(function()
+    ContentLabel.Text = "Stealer tab selected. Add stealer options here."
+end)
+
+buttons.Extra.MouseButton1Click:Connect(function()
+    ContentLabel.Text = "Extra tab selected. Add extra features here."
 end)
