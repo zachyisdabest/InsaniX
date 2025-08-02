@@ -6,9 +6,9 @@ local function loadMainHub()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/mainhub.lua"))()
 end
 
--- Try to load saved key
-local hasValidKey = false
+-- Check for saved key
 local savedKey = ""
+local hasValidKey = false
 
 local success, result = pcall(function()
     return readfile("InsaniX_key.txt")
@@ -19,7 +19,7 @@ if success and result and result ~= "" then
     hasValidKey = true
 end
 
--- Fetch valid keys from remote
+-- Fetch valid keys from GitHub
 local validKeys = {}
 local successFetch, keyList = pcall(function()
     return game:HttpGet("https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/keys.txt")
@@ -27,20 +27,19 @@ end)
 
 if successFetch then
     for key in string.gmatch(keyList, "[^\r\n]+") do
-        key = key:gsub("%s+", "") -- trim whitespace
-        validKeys[key] = true
+        validKeys[key:gsub("%s+", "")] = true
     end
 else
-    warn("Failed to fetch keys.txt from server")
+    warn("Failed to fetch keys from GitHub.")
 end
 
--- If saved key is valid, skip GUI and load hub
+-- If valid saved key exists, load hub instantly
 if hasValidKey and validKeys[savedKey] then
     loadMainHub()
     return
 end
 
--- Otherwise, show loader GUI
+-- GUI Setup
 local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 gui.Name = "InsaniXLoader"
 gui.ResetOnSpawn = false
@@ -96,7 +95,7 @@ barFill.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
 Instance.new("UICorner", barFill).CornerRadius = UDim.new(0, 6)
 
 button.MouseButton1Click:Connect(function()
-    local key = box.Text:gsub("^%s*(.-)%s*$", "%1")
+    local key = box.Text:gsub("^%s*(.-)%s*$", "%1") -- trim spaces
 
     if validKeys[key] then
         writefile("InsaniX_key.txt", key)
@@ -105,7 +104,6 @@ button.MouseButton1Click:Connect(function()
         box.Visible = false
         barBG.Visible = true
 
-        -- Loading bar animation
         for i = 1, 70 do
             barFill.Size = UDim2.new(i / 100, 0, 1, 0)
             wait(0.05)
@@ -120,11 +118,11 @@ button.MouseButton1Click:Connect(function()
 
         gui:Destroy()
         loadMainHub()
-else
-    title.Text = "Invalid Key! Try again."
-    box.Text = "" -- Clear the box for retry
-    task.delay(2, function()
-        title.Text = "InsaniX Key System"
-    end)
-end
-
+    else
+        title.Text = "Invalid Key! Try again."
+        box.Text = ""
+        task.delay(2, function()
+            title.Text = "InsaniX Key System"
+        end)
+    end
+end)
