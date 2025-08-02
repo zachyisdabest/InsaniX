@@ -1,28 +1,43 @@
--- Loader GUI
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local HttpService = game:GetService("HttpService")
 
+local function loadMainHub()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/mainhub.lua"))()
+end
+
+-- Try to load saved key
+local success, savedKey = pcall(function()
+    return readfile("InsaniX_key.txt")
+end)
+
+if success and savedKey and savedKey ~= "" then
+    -- Key exists, skip loader GUI and run mainhub immediately
+    loadMainHub()
+    return
+end
+
+-- Otherwise, show loader GUI and validate keys as usual
 -- Fetch valid keys from remote
 local validKeys = {}
-local success, result = pcall(function()
+local successFetch, result = pcall(function()
     return game:HttpGet("https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/keys.txt")
 end)
 
-if success then
+if successFetch then
     for key in string.gmatch(result, "[^\r\n]+") do
+        key = key:gsub("%s+", "") -- trim whitespace
         validKeys[key] = true
     end
 else
     warn("Failed to fetch keys.txt from server")
 end
 
--- Create ScreenGui
+-- Create GUI
 local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 gui.Name = "InsaniXLoader"
 gui.ResetOnSpawn = false
 
--- Main Frame
 local frame = Instance.new("Frame", gui)
 frame.Position = UDim2.new(0.5, -150, 0.5, -85)
 frame.Size = UDim2.new(0, 300, 0, 170)
@@ -31,7 +46,6 @@ frame.BackgroundTransparency = 0.3
 frame.BorderSizePixel = 0
 Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
 
--- Title
 local title = Instance.new("TextLabel", frame)
 title.Size = UDim2.new(1, 0, 0, 30)
 title.Text = "InsaniX Key System"
@@ -40,7 +54,6 @@ title.BackgroundTransparency = 1
 title.Font = Enum.Font.GothamBold
 title.TextSize = 20
 
--- Key Input
 local box = Instance.new("TextBox", frame)
 box.Position = UDim2.new(0.1, 0, 0.3, 0)
 box.Size = UDim2.new(0.8, 0, 0, 30)
@@ -53,7 +66,6 @@ box.Font = Enum.Font.Gotham
 box.TextSize = 14
 Instance.new("UICorner", box).CornerRadius = UDim.new(0, 6)
 
--- Submit Button
 local button = Instance.new("TextButton", frame)
 button.Position = UDim2.new(0.1, 0, 0.55, 0)
 button.Size = UDim2.new(0.8, 0, 0, 30)
@@ -64,7 +76,6 @@ button.Font = Enum.Font.GothamBold
 button.TextSize = 14
 Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
 
--- Loading Bar Background
 local barBG = Instance.new("Frame", frame)
 barBG.Position = UDim2.new(0.1, 0, 0.8, 0)
 barBG.Size = UDim2.new(0.8, 0, 0, 20)
@@ -72,15 +83,13 @@ barBG.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 barBG.Visible = false
 Instance.new("UICorner", barBG).CornerRadius = UDim.new(0, 6)
 
--- Loading Bar Fill
 local barFill = Instance.new("Frame", barBG)
 barFill.Size = UDim2.new(0, 0, 1, 0)
 barFill.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
 Instance.new("UICorner", barFill).CornerRadius = UDim.new(0, 6)
 
--- Submit Button Logic
 button.MouseButton1Click:Connect(function()
-    local key = box.Text
+    local key = box.Text:gsub("^%s*(.-)%s*$", "%1") -- trim spaces
 
     if validKeys[key] then
         writefile("InsaniX_key.txt", key)
@@ -89,13 +98,13 @@ button.MouseButton1Click:Connect(function()
         box.Visible = false
         barBG.Visible = true
 
-        -- Animate loading bar with a pause at 70%
+        -- Loading bar animation with pause
         for i = 1, 70 do
             barFill.Size = UDim2.new(i / 100, 0, 1, 0)
             wait(0.05)
         end
 
-        wait(0.7) -- Pause for 0.7 seconds at 70%
+        wait(0.7)
 
         for i = 71, 100 do
             barFill.Size = UDim2.new(i / 100, 0, 1, 0)
@@ -103,7 +112,7 @@ button.MouseButton1Click:Connect(function()
         end
 
         gui:Destroy()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/mainhub.lua"))()
+        loadMainHub()
     else
         title.Text = "Invalid Key!"
     end
