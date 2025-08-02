@@ -1,41 +1,58 @@
 
--- mainhub.lua
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-
-local gui = Instance.new("ScreenGui", game.CoreGui)
-gui.Name = "InsaniX_Hub"
-
-local mainFrame = Instance.new("Frame", gui)
-mainFrame.Size = UDim2.new(0, 500, 0, 300)
-mainFrame.Position = UDim2.new(0.5, -250, 0.5, -150)
-mainFrame.BackgroundTransparency = 0.2
-mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-mainFrame.BorderSizePixel = 0
-
-local title = Instance.new("TextLabel", mainFrame)
-title.Size = UDim2.new(1, 0, 0, 50)
-title.Position = UDim2.new(0, 0, 0, 0)
-title.Text = "InsaniX Hub - Features"
-title.BackgroundTransparency = 1
-title.TextScaled = true
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-
-local list = {
-    "Aimbot with Webslinger",
-    "Anti Traps",
-    "Anti Hit",
-    "Speed Boost req(750 cash)",
-    "Infinite Jump"
-}
-
-for i, text in ipairs(list) do
-    local label = Instance.new("TextLabel", mainFrame)
-    label.Size = UDim2.new(1, -20, 0, 30)
-    label.Position = UDim2.new(0, 10, 0, 50 + (i - 1) * 35)
-    label.BackgroundTransparency = 0.1
-    label.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    label.Text = text .. " (coming soon)"
-    label.TextColor3 = Color3.new(1, 1, 1)
-    label.TextScaled = true
+-- Key check
+if not isfile or not readfile or not isfile("InsaniX_key.txt") then
+    warn("Unauthorized access. Please use the official loader.")
+    return
 end
+
+local key = readfile("InsaniX_key.txt")
+if not key or key == "" then
+    warn("No valid key found. Please run the loader first.")
+    return
+end
+
+-- GUI Setup
+local ScreenGui = Instance.new("ScreenGui")
+local Frame = Instance.new("Frame")
+local UICorner = Instance.new("UICorner")
+local Title = Instance.new("TextLabel")
+local Features = Instance.new("TextLabel")
+
+ScreenGui.Name = "InsaniXMainGUI"
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+Frame.Parent = ScreenGui
+Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Frame.Position = UDim2.new(0.3, 0, 0.2, 0)
+Frame.Size = UDim2.new(0, 400, 0, 300)
+Frame.BackgroundTransparency = 0.2
+
+UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.Parent = Frame
+
+Title.Name = "Title"
+Title.Parent = Frame
+Title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundTransparency = 1.000
+Title.Position = UDim2.new(0, 0, 0, 10)
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "InsaniX Hub"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 28.000
+Title.TextStrokeTransparency = 0.800
+
+Features.Name = "Features"
+Features.Parent = Frame
+Features.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Features.BackgroundTransparency = 1.000
+Features.Position = UDim2.new(0, 20, 0, 60)
+Features.Size = UDim2.new(1, -40, 1, -70)
+Features.Font = Enum.Font.Gotham
+Features.Text = "• ESP features here\n• Stealer feature here\n• More features soon..."
+Features.TextColor3 = Color3.fromRGB(200, 200, 200)
+Features.TextSize = 18.000
+Features.TextWrapped = true
+Features.TextXAlignment = Enum.TextXAlignment.Left
+Features.TextYAlignment = Enum.TextYAlignment.Top
