@@ -1,58 +1,65 @@
---// MainHub.lua for InsaniX - Enhanced with Toggles and Draggable TitleBar
+--// MainHub.lua for InsaniX - ESP GUI with Sidebar and Player Features
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 
--- Remove old UI if exists
+-- Destroy existing UI
 if game.CoreGui:FindFirstChild("InsaniX_UI") then
     game.CoreGui:FindFirstChild("InsaniX_UI"):Destroy()
 end
 
--- Screen GUI
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 ScreenGui.Name = "InsaniX_UI"
 ScreenGui.ResetOnSpawn = false
 
--- Main Frame
+-- Main UI Frame
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 450, 0, 270)
-MainFrame.Position = UDim2.new(0.5, -225, 0.5, -135)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-MainFrame.BackgroundTransparency = 0.3
+MainFrame.Size = UDim2.new(0, 500, 0, 300)
+MainFrame.Position = UDim2.new(0.5, -250, 0.5, -150)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainFrame.BackgroundTransparency = 0.2
 MainFrame.BorderSizePixel = 0
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
 
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
+local MainCorner = Instance.new("UICorner", MainFrame)
+MainCorner.CornerRadius = UDim.new(0, 10)
 
--- Title Bar (Draggable only here)
-local TitleBar = Instance.new("Frame")
-TitleBar.Size = UDim2.new(1, 0, 0, 30)
-TitleBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-TitleBar.BackgroundTransparency = 0.2
-TitleBar.BorderSizePixel = 0
-TitleBar.Parent = MainFrame
-Instance.new("UICorner", TitleBar).CornerRadius = UDim.new(0, 10)
+-- Draggable top bar
+local TopBar = Instance.new("Frame")
+TopBar.Size = UDim2.new(1, 0, 0, 30)
+TopBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+TopBar.BorderSizePixel = 0
+TopBar.Name = "TopBar"
+TopBar.Parent = MainFrame
+local TopCorner = Instance.new("UICorner", TopBar)
+TopCorner.CornerRadius = UDim.new(0, 10)
 
-local Dragging, DragInput, DragStart, StartPos
-
-TitleBar.InputBegan:Connect(function(input)
+local dragging, dragInput, dragStart, startPos
+TopBar.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        Dragging = true
-        DragStart = input.Position
-        StartPos = MainFrame.Position
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
         input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then Dragging = false end
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
         end)
     end
 end)
-
+TopBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
 UserInputService.InputChanged:Connect(function(input)
-    if Dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = input.Position - DragStart
-        MainFrame.Position = UDim2.new(StartPos.X.Scale, StartPos.X.Offset + delta.X, StartPos.Y.Scale, StartPos.Y.Offset + delta.Y)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     end
 end)
 
@@ -60,166 +67,136 @@ end)
 local Sidebar = Instance.new("Frame")
 Sidebar.Size = UDim2.new(0, 120, 1, 0)
 Sidebar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Sidebar.BackgroundTransparency = 0.1
 Sidebar.BorderSizePixel = 0
+Sidebar.Name = "Sidebar"
 Sidebar.Position = UDim2.new(0, 0, 0, 0)
 Sidebar.Parent = MainFrame
-Instance.new("UICorner", Sidebar).CornerRadius = UDim.new(0, 8)
+local SidebarCorner = Instance.new("UICorner", Sidebar)
+SidebarCorner.CornerRadius = UDim.new(0, 8)
 
--- Player Button
-local PlayerButton = Instance.new("TextButton")
-PlayerButton.Size = UDim2.new(1, -20, 0, 30)
-PlayerButton.Position = UDim2.new(0, 10, 0, 40)
-PlayerButton.Text = "👤 Player"
-PlayerButton.Font = Enum.Font.GothamBold
-PlayerButton.TextSize = 14
-PlayerButton.TextColor3 = Color3.new(1, 1, 1)
-PlayerButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-PlayerButton.BorderSizePixel = 0
-PlayerButton.Parent = Sidebar
-Instance.new("UICorner", PlayerButton).CornerRadius = UDim.new(0, 6)
+local function createSidebarButton(text)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -20, 0, 30)
+    btn.Position = UDim2.new(0, 10, 0, 10)
+    btn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.Gotham
+    btn.TextSize = 14
+    btn.AutoButtonColor = true
+    btn.Parent = Sidebar
+    local btnCorner = Instance.new("UICorner", btn)
+    btnCorner.CornerRadius = UDim.new(0, 6)
+    return btn
+end
 
--- Right Panel
-local RightPanel = Instance.new("Frame")
-RightPanel.Size = UDim2.new(1, -130, 1, -40)
-RightPanel.Position = UDim2.new(0, 130, 0, 35)
-RightPanel.BackgroundTransparency = 1
-RightPanel.Visible = false
-RightPanel.Parent = MainFrame
+-- Feature Frame
+local FeatureFrame = Instance.new("Frame")
+FeatureFrame.Position = UDim2.new(0, 130, 0, 40)
+FeatureFrame.Size = UDim2.new(1, -140, 1, -50)
+FeatureFrame.BackgroundTransparency = 1
+FeatureFrame.Name = "FeatureFrame"
+FeatureFrame.Parent = MainFrame
 
--- Toggle Builder
-local function createToggle(labelText, yPosition, callback)
+local function createToggle(name, positionY)
     local toggle = Instance.new("TextButton")
-    toggle.Size = UDim2.new(0, 220, 0, 35)
-    toggle.Position = UDim2.new(0, 10, 0, yPosition)
-    toggle.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-    toggle.Text = "❌ " .. labelText
+    toggle.Name = name .. "Toggle"
+    toggle.Text = name .. " [OFF]"
+    toggle.Position = UDim2.new(0, 10, 0, positionY)
+    toggle.Size = UDim2.new(0, 200, 0, 30)
+    toggle.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
     toggle.Font = Enum.Font.Gotham
     toggle.TextSize = 14
-    toggle.TextColor3 = Color3.new(1, 1, 1)
     toggle.BorderSizePixel = 0
-    toggle.AutoButtonColor = true
-    toggle.Parent = RightPanel
-
-    local on = false
-    toggle.MouseButton1Click:Connect(function()
-        on = not on
-        toggle.Text = (on and "✅ " or "❌ ") .. labelText
-        if callback then callback(on) end
-    end)
-
-    Instance.new("UICorner", toggle).CornerRadius = UDim.new(0, 6)
+    toggle.Parent = FeatureFrame
+    local corner = Instance.new("UICorner", toggle)
+    corner.CornerRadius = UDim.new(0, 6)
+    return toggle
 end
 
--- Features
-createToggle("Player ESP", 0, function(state)
-    for _, v in pairs(game.Players:GetPlayers()) do
-        if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("Head") then
-            if state then
-                if not v.Character.Head:FindFirstChild("ESPTag") then
-                    local bill = Instance.new("BillboardGui", v.Character.Head)
-                    bill.Name = "ESPTag"
-                    bill.Adornee = v.Character.Head
-                    bill.Size = UDim2.new(0, 100, 0, 40)
-                    bill.StudsOffset = Vector3.new(0, 2, 0)
-                    bill.AlwaysOnTop = true
+local espEnabled = false
+local infiniteJumpEnabled = false
+local flyEnabled = false
 
-                    local label = Instance.new("TextLabel", bill)
-                    label.Text = v.Name
-                    label.Size = UDim2.new(1, 0, 1, 0)
-                    label.TextColor3 = Color3.new(1, 1, 1)
-                    label.BackgroundTransparency = 1
-                    label.Font = Enum.Font.GothamBold
-                    label.TextSize = 14
-                end
-            else
-                if v.Character.Head:FindFirstChild("ESPTag") then
-                    v.Character.Head.ESPTag:Destroy()
-                end
+local function updateToggleState(button, state)
+    button.Text = button.Name:gsub("Toggle", "") .. (state and " [ON]" or " [OFF]")
+end
+
+local EspToggle = createToggle("ESP", 10)
+EspToggle.MouseButton1Click:Connect(function()
+    espEnabled = not espEnabled
+    updateToggleState(EspToggle, espEnabled)
+end)
+
+local JumpToggle = createToggle("InfiniteJump", 50)
+JumpToggle.MouseButton1Click:Connect(function()
+    infiniteJumpEnabled = not infiniteJumpEnabled
+    updateToggleState(JumpToggle, infiniteJumpEnabled)
+end)
+
+local FlyToggle = createToggle("Fly", 90)
+FlyToggle.MouseButton1Click:Connect(function()
+    flyEnabled = not flyEnabled
+    updateToggleState(FlyToggle, flyEnabled)
+end)
+
+-- Infinite Jump
+UserInputService.JumpRequest:Connect(function()
+    if infiniteJumpEnabled then
+        LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+    end
+end)
+
+-- Basic Fly (improved feel)
+local BodyGyro, BodyVelocity
+UserInputService.InputBegan:Connect(function(input, gpe)
+    if flyEnabled and not gpe and input.KeyCode == Enum.KeyCode.Space then
+        local char = LocalPlayer.Character
+        if char then
+            local root = char:FindFirstChild("HumanoidRootPart")
+            if root then
+                BodyGyro = Instance.new("BodyGyro", root)
+                BodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
+                BodyGyro.P = 10000
+                BodyGyro.CFrame = root.CFrame
+
+                BodyVelocity = Instance.new("BodyVelocity", root)
+                BodyVelocity.Velocity = Vector3.new(0, 40, 0)
+                BodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
+                wait(0.2)
+                BodyVelocity:Destroy()
+                BodyGyro:Destroy()
             end
         end
     end
 end)
 
-createToggle("Infinite Jump", 40, function(state)
-    if state then
-        _G.InfJump = true
-        game:GetService("UserInputService").JumpRequest:Connect(function()
-            if _G.InfJump then
-                LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
-            end
-        end)
-    else
-        _G.InfJump = false
-    end
-end)
-
-createToggle("Fly", 80, function(state)
-    _G.FLYING = state
-    local char = LocalPlayer.Character
-    local hrp = char:WaitForChild("HumanoidRootPart")
-    local bv = Instance.new("BodyVelocity", hrp)
-    bv.Name = "FlyVelocity"
-    bv.MaxForce = Vector3.new(99999, 99999, 99999)
-    bv.Velocity = Vector3.new(0, 0, 0)
-
-    local conn
-    conn = game:GetService("RunService").RenderStepped:Connect(function()
-        if not _G.FLYING then
-            bv:Destroy()
-            conn:Disconnect()
-            return
-        end
-        bv.Velocity = LocalPlayer:GetMouse().Hit.LookVector * 50
-    end)
-end)
-
-createToggle("Speed", 120, function(state)
-    if state then
-        LocalPlayer.Character.Humanoid.WalkSpeed = 50
-    else
-        LocalPlayer.Character.Humanoid.WalkSpeed = 16
-    end
-end)
-
--- Close Button
-local CloseButton = Instance.new("TextButton")
-CloseButton.Size = UDim2.new(0, 30, 0, 30)
-CloseButton.Position = UDim2.new(1, -35, 0, 5)
-CloseButton.Text = "✖"
-CloseButton.Font = Enum.Font.GothamBold
-CloseButton.TextSize = 14
-CloseButton.TextColor3 = Color3.new(1, 1, 1)
-CloseButton.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
-CloseButton.BorderSizePixel = 0
-CloseButton.Parent = TitleBar
-Instance.new("UICorner", CloseButton).CornerRadius = UDim.new(0, 6)
-
-CloseButton.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
-end)
-
--- Mobile Hide on Drag to Corner
-if UserInputService.TouchEnabled then
-    local function isNearEdge()
-        local pos = MainFrame.Position
-        return pos.X.Offset < 20 or pos.Y.Offset < 20
-    end
-    MainFrame:GetPropertyChangedSignal("Position"):Connect(function()
-        if isNearEdge() then
-            MainFrame.Visible = false
-        end
-    end)
-end
-
--- Keyboard ALT to Hide UI
-UserInputService.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.LeftAlt then
+-- ALT Key to toggle visibility
+UserInputService.InputBegan:Connect(function(input, gpe)
+    if input.KeyCode == Enum.KeyCode.LeftAlt and not gpe then
         MainFrame.Visible = not MainFrame.Visible
     end
 end)
 
--- Player Button logic
-PlayerButton.MouseButton1Click:Connect(function()
-    RightPanel.Visible = not RightPanel.Visible
+-- Close Button
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Text = "Close"
+CloseBtn.Size = UDim2.new(0, 60, 0, 25)
+CloseBtn.Position = UDim2.new(1, -70, 0, 2)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 13
+CloseBtn.Parent = TopBar
+local closeCorner = Instance.new("UICorner", CloseBtn)
+closeCorner.CornerRadius = UDim.new(0, 5)
+CloseBtn.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
+-- Sidebar Button for Player tab
+local PlayerTabBtn = createSidebarButton("Player")
+PlayerTabBtn.MouseButton1Click:Connect(function()
+    FeatureFrame.Visible = true
 end)
