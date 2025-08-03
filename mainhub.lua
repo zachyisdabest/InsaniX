@@ -1,5 +1,4 @@
-
---// MainHub.lua for InsaniX - ESP GUI with Sidebar (Transparent and Smooth Corners)
+--// MainHub.lua for InsaniX - ESP GUI with Sidebar (Draggable, Smaller, Centered, Smooth UI)
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -17,12 +16,14 @@ ScreenGui.ResetOnSpawn = false
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 600, 0, 350)
-MainFrame.Position = UDim2.new(0.5, -300, 0.5, -175)
+MainFrame.Size = UDim2.new(0, 300, 0, 200)
+MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 MainFrame.BackgroundTransparency = 0.3
 MainFrame.BorderSizePixel = 0
-MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+MainFrame.Active = true
+MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
 
 local UICorner = Instance.new("UICorner", MainFrame)
@@ -31,7 +32,7 @@ UICorner.CornerRadius = UDim.new(0, 10)
 -- Sidebar
 local Sidebar = Instance.new("Frame")
 Sidebar.Name = "Sidebar"
-Sidebar.Size = UDim2.new(0, 150, 1, 0)
+Sidebar.Size = UDim2.new(0, 100, 1, 0)
 Sidebar.Position = UDim2.new(0, 0, 0, 0)
 Sidebar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 Sidebar.BackgroundTransparency = 0.2
@@ -62,19 +63,19 @@ end
 
 -- ESP Tab Frame
 local EspFrame = Instance.new("Frame")
-EspFrame.Size = UDim2.new(1, -160, 1, -20)
-EspFrame.Position = UDim2.new(0, 160, 0, 10)
+EspFrame.Size = UDim2.new(1, -110, 1, -20)
+EspFrame.Position = UDim2.new(0, 110, 0, 10)
 EspFrame.BackgroundTransparency = 1
 EspFrame.Visible = true
 EspFrame.Parent = MainFrame
 
 -- ESP Toggle Button
 local EspToggle = Instance.new("TextButton")
-EspToggle.Size = UDim2.new(0, 200, 0, 40)
-EspToggle.Position = UDim2.new(0, 20, 0, 20)
+EspToggle.Size = UDim2.new(0, 160, 0, 35)
+EspToggle.Position = UDim2.new(0, 10, 0, 10)
 EspToggle.Text = "🔍 Player ESP [OFF]"
 EspToggle.Font = Enum.Font.GothamBold
-EspToggle.TextSize = 16
+EspToggle.TextSize = 14
 EspToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
 EspToggle.BackgroundColor3 = Color3.fromRGB(70, 130, 180)
 EspToggle.BorderSizePixel = 0
