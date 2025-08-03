@@ -1,42 +1,26 @@
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local HttpService = game:GetService("HttpService")
+local UserInputService = game:GetService("UserInputService")
+
+local PRODUCT_ID = "395185" -- Your Sellauth Product ID
+
+local function isKeyValid(key)
+    local url = ("https://sellauth.gg/api/verify?key=%s&product=%s"):format(key, PRODUCT_ID)
+    local success, response = pcall(function()
+        return HttpService:GetAsync(url)
+    end)
+    if success then
+        local data = HttpService:JSONDecode(response)
+        return data.success
+    else
+        warn("Failed to check key:", response)
+        return false
+    end
+end
 
 local function loadMainHub()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/mainhub.lua"))()
-end
-
--- Check for saved key
-local savedKey = ""
-local hasValidKey = false
-
-local success, result = pcall(function()
-    return readfile("InsaniX_key.txt")
-end)
-
-if success and result and result ~= "" then
-    savedKey = result:gsub("%s+", "")
-    hasValidKey = true
-end
-
--- Fetch valid keys from GitHub
-local validKeys = {}
-local successFetch, keyList = pcall(function()
-    return game:HttpGet("https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/keys.txt")
-end)
-
-if successFetch then
-    for key in string.gmatch(keyList, "[^\r\n]+") do
-        validKeys[key:gsub("%s+", "")] = true
-    end
-else
-    warn("Failed to fetch keys from GitHub.")
-end
-
--- If valid saved key exists, load hub instantly
-if hasValidKey and validKeys[savedKey] then
-    loadMainHub()
-    return
 end
 
 -- GUI Setup
@@ -96,33 +80,39 @@ Instance.new("UICorner", barFill).CornerRadius = UDim.new(0, 6)
 
 button.MouseButton1Click:Connect(function()
     local key = box.Text:gsub("^%s*(.-)%s*$", "%1") -- trim spaces
+    if key == "" then return end
 
-    if validKeys[key] then
-        writefile("InsaniX_key.txt", key)
-        title.Text = "Welcome to InsaniX"
-        button.Visible = false
-        box.Visible = false
-        barBG.Visible = true
+    button.Active = false
+    button.Text = "Checking..."
 
-        for i = 1, 70 do
-            barFill.Size = UDim2.new(i / 100, 0, 1, 0)
-            wait(0.05)
+    spawn(function()
+        if isKeyValid(key) then
+            writefile("InsaniX_key.txt", key)
+            title.Text = "Welcome to InsaniX"
+            button.Visible = false
+            box.Visible = false
+            barBG.Visible = true
+
+            for i = 1, 70 do
+                barFill.Size = UDim2.new(i / 100, 0, 1, 0)
+                wait(0.05)
+            end
+            wait(0.7)
+            for i = 71, 100 do
+                barFill.Size = UDim2.new(i / 100, 0, 1, 0)
+                wait(0.05)
+            end
+
+            gui:Destroy()
+            loadMainHub()
+        else
+            title.Text = "Invalid or Used Key!"
+            box.Text = ""
+            button.Text = "Submit"
+            button.Active = true
+            task.delay(2, function()
+                title.Text = "InsaniX Key System"
+            end)
         end
-
-        wait(0.7)
-
-        for i = 71, 100 do
-            barFill.Size = UDim2.new(i / 100, 0, 1, 0)
-            wait(0.05)
-        end
-
-        gui:Destroy()
-        loadMainHub()
-    else
-        title.Text = "Invalid Key! Try again."
-        box.Text = ""
-        task.delay(2, function()
-            title.Text = "InsaniX Key System"
-        end)
-    end
+    end)
 end)
