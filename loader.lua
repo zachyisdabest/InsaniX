@@ -31,12 +31,12 @@ button.Parent = gui
 -- Handle Button Click
 button.MouseButton1Click:Connect(function()
     local inputKey = textbox.Text
-    local keyList = game:HttpGet("https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/keys.txt")
+    local keyList = game:HttpGet("https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/keys.txt")
 
     for key in string.gmatch(keyList, "[^\r\n]+") do
         if inputKey == key then
             gui:Destroy()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/mainhub.lua"))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/zacyisdabest/InsaniX/main/mainhub.lua"))()
             return
         end
     end
