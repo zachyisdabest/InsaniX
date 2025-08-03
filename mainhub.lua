@@ -1,234 +1,225 @@
-# Load the base UI script and apply the requested fixes:
-# 1. Improve the Fly functionality (make it smoother)
-# 2. Add a "Coming Soon" button to the sidebar that shows a blank panel or hides others
-
-updated_script = '''
---// InsaniX GUI Script (Improved Fly + Coming Soon Tab)
+--// MainHub.lua for InsaniX - Enhanced with Toggles and Draggable TitleBar
 
 local Players = game:GetService("Players")
-local UIS = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 
--- Destroy existing UI
+-- Remove old UI if exists
 if game.CoreGui:FindFirstChild("InsaniX_UI") then
-    game.CoreGui.InsaniX_UI:Destroy()
+    game.CoreGui:FindFirstChild("InsaniX_UI"):Destroy()
 end
 
--- UI Setup
+-- Screen GUI
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 ScreenGui.Name = "InsaniX_UI"
 ScreenGui.ResetOnSpawn = false
 
+-- Main Frame
 local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 500, 0, 300)
-MainFrame.Position = UDim2.new(0.5, -250, 0.5, -150)
+MainFrame.Size = UDim2.new(0, 450, 0, 270)
+MainFrame.Position = UDim2.new(0.5, -225, 0.5, -135)
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-MainFrame.BackgroundTransparency = 0.25
+MainFrame.BackgroundTransparency = 0.3
 MainFrame.BorderSizePixel = 0
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 MainFrame.Parent = ScreenGui
-MainFrame.Active = true
-MainFrame.Draggable = false
 
-local UICorner = Instance.new("UICorner", MainFrame)
-UICorner.CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 
--- Top bar (drag handle)
-local TopBar = Instance.new("Frame")
-TopBar.Size = UDim2.new(1, 0, 0, 30)
-TopBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-TopBar.BorderSizePixel = 0
-TopBar.Name = "TopBar"
-TopBar.Parent = MainFrame
+-- Title Bar (Draggable only here)
+local TitleBar = Instance.new("Frame")
+TitleBar.Size = UDim2.new(1, 0, 0, 30)
+TitleBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+TitleBar.BackgroundTransparency = 0.2
+TitleBar.BorderSizePixel = 0
+TitleBar.Parent = MainFrame
+Instance.new("UICorner", TitleBar).CornerRadius = UDim.new(0, 10)
 
-local TopBarCorner = Instance.new("UICorner", TopBar)
-TopBarCorner.CornerRadius = UDim.new(0, 10)
+local Dragging, DragInput, DragStart, StartPos
 
--- Drag functionality
-local dragging, dragInput, dragStart, startPos
-
-TopBar.InputBegan:Connect(function(input)
+TitleBar.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = MainFrame.Position
+        Dragging = true
+        DragStart = input.Position
+        StartPos = MainFrame.Position
         input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
+            if input.UserInputState == Enum.UserInputState.End then Dragging = false end
         end)
     end
 end)
 
-TopBar.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
-        dragInput = input
-    end
-end)
-
-UIS.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
-        local delta = input.Position - dragStart
-        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+UserInputService.InputChanged:Connect(function(input)
+    if Dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - DragStart
+        MainFrame.Position = UDim2.new(StartPos.X.Scale, StartPos.X.Offset + delta.X, StartPos.Y.Scale, StartPos.Y.Offset + delta.Y)
     end
 end)
 
 -- Sidebar
 local Sidebar = Instance.new("Frame")
-Sidebar.Name = "Sidebar"
 Sidebar.Size = UDim2.new(0, 120, 1, 0)
-Sidebar.Position = UDim2.new(0, 0, 0, 0)
-Sidebar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+Sidebar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 Sidebar.BackgroundTransparency = 0.1
 Sidebar.BorderSizePixel = 0
+Sidebar.Position = UDim2.new(0, 0, 0, 0)
 Sidebar.Parent = MainFrame
+Instance.new("UICorner", Sidebar).CornerRadius = UDim.new(0, 8)
 
-local SidebarCorner = Instance.new("UICorner", Sidebar)
-SidebarCorner.CornerRadius = UDim.new(0, 8)
+-- Player Button
+local PlayerButton = Instance.new("TextButton")
+PlayerButton.Size = UDim2.new(1, -20, 0, 30)
+PlayerButton.Position = UDim2.new(0, 10, 0, 40)
+PlayerButton.Text = "👤 Player"
+PlayerButton.Font = Enum.Font.GothamBold
+PlayerButton.TextSize = 14
+PlayerButton.TextColor3 = Color3.new(1, 1, 1)
+PlayerButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+PlayerButton.BorderSizePixel = 0
+PlayerButton.Parent = Sidebar
+Instance.new("UICorner", PlayerButton).CornerRadius = UDim.new(0, 6)
 
--- Content Frames
-local PlayerFrame = Instance.new("Frame")
-PlayerFrame.Size = UDim2.new(1, -130, 1, -40)
-PlayerFrame.Position = UDim2.new(0, 130, 0, 35)
-PlayerFrame.BackgroundTransparency = 1
-PlayerFrame.Visible = false
-PlayerFrame.Name = "PlayerFrame"
-PlayerFrame.Parent = MainFrame
+-- Right Panel
+local RightPanel = Instance.new("Frame")
+RightPanel.Size = UDim2.new(1, -130, 1, -40)
+RightPanel.Position = UDim2.new(0, 130, 0, 35)
+RightPanel.BackgroundTransparency = 1
+RightPanel.Visible = false
+RightPanel.Parent = MainFrame
 
-local ComingSoonFrame = Instance.new("Frame")
-ComingSoonFrame.Size = PlayerFrame.Size
-ComingSoonFrame.Position = PlayerFrame.Position
-ComingSoonFrame.BackgroundTransparency = 1
-ComingSoonFrame.Visible = false
-ComingSoonFrame.Name = "ComingSoonFrame"
-ComingSoonFrame.Parent = MainFrame
-
--- Placeholder Text
-local ComingSoonLabel = Instance.new("TextLabel", ComingSoonFrame)
-ComingSoonLabel.Size = UDim2.new(1, 0, 1, 0)
-ComingSoonLabel.Text = "Coming Soon..."
-ComingSoonLabel.Font = Enum.Font.Gotham
-ComingSoonLabel.TextSize = 24
-ComingSoonLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-ComingSoonLabel.BackgroundTransparency = 1
-
--- Function to make toggle buttons
-local function createSidebarButton(name, order, frameToShow)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, -20, 0, 30)
-    btn.Position = UDim2.new(0, 10, 0, 10 + (order * 35))
-    btn.Text = name
-    btn.Font = Enum.Font.GothamSemibold
-    btn.TextSize = 14
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    btn.BorderSizePixel = 0
-    btn.Parent = Sidebar
-
-    local corner = Instance.new("UICorner", btn)
-    corner.CornerRadius = UDim.new(0, 6)
-
-    btn.MouseButton1Click:Connect(function()
-        for _, frame in pairs({PlayerFrame, ComingSoonFrame}) do
-            frame.Visible = false
-        end
-        if frameToShow then
-            frameToShow.Visible = true
-        end
-    end)
-end
-
--- Add Sidebar Buttons
-createSidebarButton("Player", 0, PlayerFrame)
-createSidebarButton("Coming Soon", 1, ComingSoonFrame)
-
--- Player Toggles
-local function createToggleButton(name, yPos, callback)
+-- Toggle Builder
+local function createToggle(labelText, yPosition, callback)
     local toggle = Instance.new("TextButton")
-    toggle.Size = UDim2.new(0, 180, 0, 35)
-    toggle.Position = UDim2.new(0, 10, 0, yPos)
-    toggle.Text = name .. ": OFF"
+    toggle.Size = UDim2.new(0, 220, 0, 35)
+    toggle.Position = UDim2.new(0, 10, 0, yPosition)
+    toggle.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    toggle.Text = "❌ " .. labelText
     toggle.Font = Enum.Font.Gotham
     toggle.TextSize = 14
-    toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-    toggle.BackgroundColor3 = Color3.fromRGB(70, 130, 180)
+    toggle.TextColor3 = Color3.new(1, 1, 1)
     toggle.BorderSizePixel = 0
-    toggle.Parent = PlayerFrame
+    toggle.AutoButtonColor = true
+    toggle.Parent = RightPanel
 
-    local corner = Instance.new("UICorner", toggle)
-    corner.CornerRadius = UDim.new(0, 6)
-
-    local state = false
+    local on = false
     toggle.MouseButton1Click:Connect(function()
-        state = not state
-        toggle.Text = name .. ": " .. (state and "ON" or "OFF")
-        if callback then callback(state) end
+        on = not on
+        toggle.Text = (on and "✅ " or "❌ ") .. labelText
+        if callback then callback(on) end
+    end)
+
+    Instance.new("UICorner", toggle).CornerRadius = UDim.new(0, 6)
+end
+
+-- Features
+createToggle("Player ESP", 0, function(state)
+    for _, v in pairs(game.Players:GetPlayers()) do
+        if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("Head") then
+            if state then
+                if not v.Character.Head:FindFirstChild("ESPTag") then
+                    local bill = Instance.new("BillboardGui", v.Character.Head)
+                    bill.Name = "ESPTag"
+                    bill.Adornee = v.Character.Head
+                    bill.Size = UDim2.new(0, 100, 0, 40)
+                    bill.StudsOffset = Vector3.new(0, 2, 0)
+                    bill.AlwaysOnTop = true
+
+                    local label = Instance.new("TextLabel", bill)
+                    label.Text = v.Name
+                    label.Size = UDim2.new(1, 0, 1, 0)
+                    label.TextColor3 = Color3.new(1, 1, 1)
+                    label.BackgroundTransparency = 1
+                    label.Font = Enum.Font.GothamBold
+                    label.TextSize = 14
+                end
+            else
+                if v.Character.Head:FindFirstChild("ESPTag") then
+                    v.Character.Head.ESPTag:Destroy()
+                end
+            end
+        end
+    end
+end)
+
+createToggle("Infinite Jump", 40, function(state)
+    if state then
+        _G.InfJump = true
+        game:GetService("UserInputService").JumpRequest:Connect(function()
+            if _G.InfJump then
+                LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+            end
+        end)
+    else
+        _G.InfJump = false
+    end
+end)
+
+createToggle("Fly", 80, function(state)
+    _G.FLYING = state
+    local char = LocalPlayer.Character
+    local hrp = char:WaitForChild("HumanoidRootPart")
+    local bv = Instance.new("BodyVelocity", hrp)
+    bv.Name = "FlyVelocity"
+    bv.MaxForce = Vector3.new(99999, 99999, 99999)
+    bv.Velocity = Vector3.new(0, 0, 0)
+
+    local conn
+    conn = game:GetService("RunService").RenderStepped:Connect(function()
+        if not _G.FLYING then
+            bv:Destroy()
+            conn:Disconnect()
+            return
+        end
+        bv.Velocity = LocalPlayer:GetMouse().Hit.LookVector * 50
+    end)
+end)
+
+createToggle("Speed", 120, function(state)
+    if state then
+        LocalPlayer.Character.Humanoid.WalkSpeed = 50
+    else
+        LocalPlayer.Character.Humanoid.WalkSpeed = 16
+    end
+end)
+
+-- Close Button
+local CloseButton = Instance.new("TextButton")
+CloseButton.Size = UDim2.new(0, 30, 0, 30)
+CloseButton.Position = UDim2.new(1, -35, 0, 5)
+CloseButton.Text = "✖"
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.TextSize = 14
+CloseButton.TextColor3 = Color3.new(1, 1, 1)
+CloseButton.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+CloseButton.BorderSizePixel = 0
+CloseButton.Parent = TitleBar
+Instance.new("UICorner", CloseButton).CornerRadius = UDim.new(0, 6)
+
+CloseButton.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
+-- Mobile Hide on Drag to Corner
+if UserInputService.TouchEnabled then
+    local function isNearEdge()
+        local pos = MainFrame.Position
+        return pos.X.Offset < 20 or pos.Y.Offset < 20
+    end
+    MainFrame:GetPropertyChangedSignal("Position"):Connect(function()
+        if isNearEdge() then
+            MainFrame.Visible = false
+        end
     end)
 end
 
--- ESP Toggle (Placeholder)
-createToggleButton("Player ESP", 10, function(state)
-    -- ESP logic placeholder
-end)
-
--- Infinite Jump
-local infiniteJumpEnabled = false
-createToggleButton("Infinite Jump", 50, function(state)
-    infiniteJumpEnabled = state
-end)
-
--- Speed (Simple WalkSpeed)
-createToggleButton("Speed", 90, function(state)
-    LocalPlayer.Character.Humanoid.WalkSpeed = state and 50 or 16
-end)
-
--- Smooth Fly
-local flying = false
-createToggleButton("Fly", 130, function(state)
-    flying = state
-    local character = LocalPlayer.Character
-    if not character then return end
-    local hrp = character:FindFirstChild("HumanoidRootPart")
-    local bv = hrp and hrp:FindFirstChild("InsaniX_Fly")
-    if bv then bv:Destroy() end
-    if not state then return end
-
-    bv = Instance.new("BodyVelocity", hrp)
-    bv.Name = "InsaniX_Fly"
-    bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-    bv.Velocity = Vector3.zero
-
-    RunService.RenderStepped:Connect(function()
-        if not flying or not bv or not hrp then return end
-        local dir = Vector3.zero
-        if UIS:IsKeyDown(Enum.KeyCode.W) then dir = dir + workspace.CurrentCamera.CFrame.LookVector end
-        if UIS:IsKeyDown(Enum.KeyCode.S) then dir = dir - workspace.CurrentCamera.CFrame.LookVector end
-        if UIS:IsKeyDown(Enum.KeyCode.A) then dir = dir - workspace.CurrentCamera.CFrame.RightVector end
-        if UIS:IsKeyDown(Enum.KeyCode.D) then dir = dir + workspace.CurrentCamera.CFrame.RightVector end
-        if UIS:IsKeyDown(Enum.KeyCode.Space) then dir = dir + Vector3.new(0, 1, 0) end
-        if UIS:IsKeyDown(Enum.KeyCode.LeftControl) then dir = dir - Vector3.new(0, 1, 0) end
-        bv.Velocity = dir.Unit * 60
-    end)
-end)
-
--- Alt Hide/Show
-local hidden = false
-UIS.InputBegan:Connect(function(input)
+-- Keyboard ALT to Hide UI
+UserInputService.InputBegan:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.LeftAlt then
-        hidden = not hidden
-        MainFrame.Visible = not hidden
+        MainFrame.Visible = not MainFrame.Visible
     end
 end)
 
--- Infinite Jump Logic
-game:GetService("UserInputService").JumpRequest:Connect(function()
-    if infiniteJumpEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-    end
+-- Player Button logic
+PlayerButton.MouseButton1Click:Connect(function()
+    RightPanel.Visible = not RightPanel.Visible
 end)
-'''
-
-updated_script[:1200]  # Truncated preview; full script is returned below.
