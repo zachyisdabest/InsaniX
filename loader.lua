@@ -104,6 +104,7 @@ local function loadMainHub()
     tween:Play()
     tween.Completed:Wait()
     ScreenGui:Destroy()
+    _G.InsaniXLoaded = true  -- <-- Set flag before loading mainhub
     loadstring(game:HttpGet(mainHubURL))()
 end
 
