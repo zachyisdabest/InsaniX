@@ -1,4 +1,11 @@
 -- mainhub.lua
+
+-- Protection check: block direct runs unless loaded via loader
+if not _G.InsaniXLoaded then
+    warn("Access denied: Please load InsaniX through the loader script.")
+    return
+end
+
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
