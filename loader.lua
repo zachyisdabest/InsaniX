@@ -1,118 +1,127 @@
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
 local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+local hwid = game:GetService("RbxAnalyticsService"):GetClientId()
 
-local PRODUCT_ID = "395185" -- Your Sellauth Product ID
+local savedKeyFile = "insanix_key.txt"
+local productId = "565248"
+local mainHubURL = "https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/mainhub.lua"
 
-local function isKeyValid(key)
-    local url = ("https://sellauth.gg/api/verify?key=%s&product=%s"):format(key, PRODUCT_ID)
+-- Check if key was saved
+local function readSavedKey()
+    if isfile and isfile(savedKeyFile) then
+        return readfile(savedKeyFile)
+    end
+    return nil
+end
+
+local function saveKey(key)
+    if writefile then
+        writefile(savedKeyFile, key)
+    end
+end
+
+-- Create UI
+local ScreenGui = Instance.new("ScreenGui", gethui and gethui() or game.CoreGui)
+ScreenGui.Name = "InsaniXLoader"
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.Size = UDim2.new(0, 300, 0, 180)
+Frame.Position = UDim2.new(0.5, -150, 0.5, -90)
+Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+Frame.BorderSizePixel = 0
+Frame.Active = true
+Frame.Draggable = true
+
+local Title = Instance.new("TextLabel", Frame)
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.BackgroundTransparency = 1
+Title.Text = "InsaniX Loader"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 22
+
+local KeyBox = Instance.new("TextBox", Frame)
+KeyBox.PlaceholderText = "Enter License Key"
+KeyBox.Size = UDim2.new(0.9, 0, 0, 30)
+KeyBox.Position = UDim2.new(0.05, 0, 0, 60)
+KeyBox.Text = ""
+KeyBox.Font = Enum.Font.Gotham
+KeyBox.TextSize = 16
+KeyBox.TextColor3 = Color3.fromRGB(0, 0, 0)
+KeyBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+KeyBox.BorderSizePixel = 0
+
+local Status = Instance.new("TextLabel", Frame)
+Status.Position = UDim2.new(0.05, 0, 0, 100)
+Status.Size = UDim2.new(0.9, 0, 0, 20)
+Status.Text = ""
+Status.TextColor3 = Color3.fromRGB(255, 255, 255)
+Status.BackgroundTransparency = 1
+Status.Font = Enum.Font.Gotham
+Status.TextSize = 14
+
+local LoadButton = Instance.new("TextButton", Frame)
+LoadButton.Text = "Verify Key"
+LoadButton.Size = UDim2.new(0.9, 0, 0, 30)
+LoadButton.Position = UDim2.new(0.05, 0, 0, 130)
+LoadButton.BackgroundColor3 = Color3.fromRGB(30, 150, 255)
+LoadButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+LoadButton.Font = Enum.Font.GothamBold
+LoadButton.TextSize = 16
+LoadButton.BorderSizePixel = 0
+
+-- Loading Bar
+local LoadingBar = Instance.new("Frame", Frame)
+LoadingBar.Size = UDim2.new(0, 0, 0, 5)
+LoadingBar.Position = UDim2.new(0, 0, 1, -5)
+LoadingBar.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+LoadingBar.BorderSizePixel = 0
+LoadingBar.Visible = false
+
+-- Validation Function
+local function verifyKey(key)
+    local url = ("https://sellauth.gg/api/verify?key=%s&product=%s&hwid=%s"):format(key, productId, hwid)
     local success, response = pcall(function()
-        return HttpService:GetAsync(url)
+        return HttpService:JSONDecode(game:HttpGet(url))
     end)
-    if success then
-        local data = HttpService:JSONDecode(response)
-        return data.success
+
+    if success and response.success then
+        return true
     else
-        warn("Failed to check key:", response)
+        warn("Key validation failed:", response and response.message or "Unknown error")
         return false
     end
 end
 
+-- Load MainHub
 local function loadMainHub()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/mainhub.lua"))()
+    local tween = TweenService:Create(LoadingBar, TweenInfo.new(5), { Size = UDim2.new(1, 0, 0, 5) })
+    LoadingBar.Visible = true
+    tween:Play()
+    tween.Completed:Wait()
+    ScreenGui:Destroy()
+    loadstring(game:HttpGet(mainHubURL))()
 end
 
--- GUI Setup
-local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-gui.Name = "InsaniXLoader"
-gui.ResetOnSpawn = false
-
-local frame = Instance.new("Frame", gui)
-frame.Position = UDim2.new(0.5, -150, 0.5, -85)
-frame.Size = UDim2.new(0, 300, 0, 170)
-frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-frame.BackgroundTransparency = 0.3
-frame.BorderSizePixel = 0
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
-
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1, 0, 0, 30)
-title.Text = "InsaniX Key System"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.BackgroundTransparency = 1
-title.Font = Enum.Font.GothamBold
-title.TextSize = 20
-
-local box = Instance.new("TextBox", frame)
-box.Position = UDim2.new(0.1, 0, 0.3, 0)
-box.Size = UDim2.new(0.8, 0, 0, 30)
-box.PlaceholderText = "Enter your key here"
-box.Text = ""
-box.ClearTextOnFocus = true
-box.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-box.TextColor3 = Color3.fromRGB(255, 255, 255)
-box.Font = Enum.Font.Gotham
-box.TextSize = 14
-Instance.new("UICorner", box).CornerRadius = UDim.new(0, 6)
-
-local button = Instance.new("TextButton", frame)
-button.Position = UDim2.new(0.1, 0, 0.55, 0)
-button.Size = UDim2.new(0.8, 0, 0, 30)
-button.Text = "Submit"
-button.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
-button.TextColor3 = Color3.fromRGB(255, 255, 255)
-button.Font = Enum.Font.GothamBold
-button.TextSize = 14
-Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
-
-local barBG = Instance.new("Frame", frame)
-barBG.Position = UDim2.new(0.1, 0, 0.8, 0)
-barBG.Size = UDim2.new(0.8, 0, 0, 20)
-barBG.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-barBG.Visible = false
-Instance.new("UICorner", barBG).CornerRadius = UDim.new(0, 6)
-
-local barFill = Instance.new("Frame", barBG)
-barFill.Size = UDim2.new(0, 0, 1, 0)
-barFill.BackgroundColor3 = Color3.fromRGB(60, 120, 255)
-Instance.new("UICorner", barFill).CornerRadius = UDim.new(0, 6)
-
-button.MouseButton1Click:Connect(function()
-    local key = box.Text:gsub("^%s*(.-)%s*$", "%1") -- trim spaces
-    if key == "" then return end
-
-    button.Active = false
-    button.Text = "Checking..."
-
-    spawn(function()
-        if isKeyValid(key) then
-            writefile("InsaniX_key.txt", key)
-            title.Text = "Welcome to InsaniX"
-            button.Visible = false
-            box.Visible = false
-            barBG.Visible = true
-
-            for i = 1, 70 do
-                barFill.Size = UDim2.new(i / 100, 0, 1, 0)
-                wait(0.05)
-            end
-            wait(0.7)
-            for i = 71, 100 do
-                barFill.Size = UDim2.new(i / 100, 0, 1, 0)
-                wait(0.05)
-            end
-
-            gui:Destroy()
-            loadMainHub()
-        else
-            title.Text = "Invalid or Used Key!"
-            box.Text = ""
-            button.Text = "Submit"
-            button.Active = true
-            task.delay(2, function()
-                title.Text = "InsaniX Key System"
-            end)
-        end
-    end)
+-- Click to Verify
+LoadButton.MouseButton1Click:Connect(function()
+    local key = KeyBox.Text
+    Status.Text = "Verifying..."
+    if verifyKey(key) then
+        Status.Text = "Key valid. Loading..."
+        saveKey(key)
+        loadMainHub()
+    else
+        Status.Text = "Invalid key. Try again."
+    end
 end)
+
+-- Auto load if key exists
+local existing = readSavedKey()
+if existing and verifyKey(existing) then
+    loadMainHub()
+end
