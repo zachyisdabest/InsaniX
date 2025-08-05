@@ -81,7 +81,7 @@ local function showLoaderUI()
     Status.Position = UDim2.new(0.05, 0, 0, 100)
     Status.Size = UDim2.new(0.9, 0, 0, 20)
     Status.Text = ""
-    Status.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Status.TextColor3 = Color3.fromRGB(0, 0, 0)
     Status.BackgroundTransparency = 1
     Status.Font = Enum.Font.Gotham
     Status.TextSize = 14
