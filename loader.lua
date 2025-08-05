@@ -9,7 +9,7 @@ local hwid = game:GetService("RbxAnalyticsService"):GetClientId()
 
 -- Config
 local savedKeyFile = "insanix_key.txt"
-local productId = "565248" -- Your Sellauth product ID
+local productId = "395185" -- Your Sellauth product ID
 local mainHubURL = "https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/mainhub.lua"
 
 -- File Functions
