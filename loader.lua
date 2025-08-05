@@ -1,167 +1,41 @@
---// Loader.lua for InsaniX
+-- put near your other config
+local workerURL = "https://insanix-verify.yourname.workers.dev"  -- <-- your worker
+local workerToken = "insanix-SECRET-123"                         -- <-- same TOKEN you set in CF
 
--- Services
-local HttpService = game:GetService("HttpService")
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local TweenService = game:GetService("TweenService")
-local hwid = game:GetService("RbxAnalyticsService"):GetClientId()
-
--- Config
-local savedKeyFile = "insanix_key.txt"
-local productId = "395185" -- Your Sellauth product ID
-local mainHubURL = "https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/mainhub.lua"
-
--- File Functions
-local function readSavedKey()
-    if isfile and isfile(savedKeyFile) then
-        return readfile(savedKeyFile)
-    end
-    return nil
-end
-
-local function saveKey(key)
-    if writefile then
-        writefile(savedKeyFile, key)
-    end
-end
-
--- Key Validation
 local function verifyKey(key)
     key = tostring(key or ""):gsub("%s+", "") -- trim spaces/newlines
+    local url = ("%s?key=%s&hwid=%s&token=%s")
+        :format(workerURL,
+                HttpService:UrlEncode(key),
+                HttpService:UrlEncode(hwid),
+                HttpService:UrlEncode(workerToken))
 
-    local url = ("https://sellauth.gg/api/verify?key=%s&product=%s&hwid=%s")
-        :format(HttpService:UrlEncode(key), HttpService:UrlEncode(productId), HttpService:UrlEncode(hwid))
-
+    -- Use HttpGet; executors generally allow this. If yours supports RequestAsync, that’s fine too.
     local okHttp, body = pcall(function()
         return game:HttpGet(url)
     end)
     if not okHttp then
-        warn("[InsaniX] HTTP error:", body)
+        warn("[InsaniX] HTTP error via proxy:", body)
         return false
     end
 
-    print("[InsaniX] Verify URL:", url)
-    print("[InsaniX] Raw response:", body)
+    -- Debug: see what the proxy (and Sellauth) returned
+    print("[InsaniX] Proxy response:", body)
 
-    local okJson, data = pcall(function() return HttpService:JSONDecode(body) end)
+    local okJson, data = pcall(function()
+        return HttpService:JSONDecode(body)
+    end)
     if not okJson then
-        warn("[InsaniX] JSON parse failed")
+        warn("[InsaniX] JSON decode failed")
         return false
     end
 
-    -- Adjust these to whatever the API returns
+    -- Accept common success shapes (adjust if your API returns different fields)
     if data.success == true or data.valid == true or data.status == "success" then
         return true
     end
 
-    -- Surface the exact reason
     if data.message then warn("[InsaniX] Verify failed:", data.message) end
-    if data.reason then warn("[InsaniX] Reason:", data.reason) end
-
+    if data.reason  then warn("[InsaniX] Reason:", data.reason) end
     return false
-end
-
-
--- Loader UI
-local function showLoaderUI()
-    local ScreenGui = Instance.new("ScreenGui", gethui and gethui() or game.CoreGui)
-    ScreenGui.Name = "InsaniXLoader"
-    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
-    -- Frame
-    local Frame = Instance.new("Frame", ScreenGui)
-    Frame.Size = UDim2.new(0, 300, 0, 180)
-    Frame.Position = UDim2.new(0.5, -150, 0.5, -90)
-    Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    Frame.BorderSizePixel = 0
-    Frame.Active = true
-    Frame.Draggable = true
-    Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 8) -- Smooth corners
-    
-    local Title = Instance.new("TextLabel", Frame)
-    Title.Size = UDim2.new(1, 0, 0, 40)
-    Title.BackgroundTransparency = 1
-    Title.Text = "InsaniX Loader"
-    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.Font = Enum.Font.GothamBold
-    Title.TextSize = 22
-
-    -- TextBox
-    local KeyBox = Instance.new("TextBox", Frame)
-    KeyBox.PlaceholderText = "Enter License Key"
-    KeyBox.Size = UDim2.new(0.9, 0, 0, 30)
-    KeyBox.Position = UDim2.new(0.05, 0, 0, 60)
-    KeyBox.Text = ""
-    KeyBox.Font = Enum.Font.Gotham
-    KeyBox.TextSize = 16
-    KeyBox.TextColor3 = Color3.fromRGB(0, 0, 0)
-    KeyBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    KeyBox.BorderSizePixel = 0
-    Instance.new("UICorner", KeyBox).CornerRadius = UDim.new(0, 6) -- Smooth corners
-
-    local Status = Instance.new("TextLabel", Frame)
-    Status.Position = UDim2.new(0.05, 0, 0, 100)
-    Status.Size = UDim2.new(0.9, 0, 0, 20)
-    Status.Text = ""
-    Status.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Status.BackgroundTransparency = 1
-    Status.Font = Enum.Font.Gotham
-    Status.TextSize = 14
-
-    -- Verify Key Button
-    local LoadButton = Instance.new("TextButton", Frame)
-    LoadButton.Text = "Verify Key"
-    LoadButton.Size = UDim2.new(0.9, 0, 0, 30)
-    LoadButton.Position = UDim2.new(0.05, 0, 0, 130)
-    LoadButton.BackgroundColor3 = Color3.fromRGB(30, 150, 255)
-    LoadButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-    LoadButton.Font = Enum.Font.GothamBold
-    LoadButton.TextSize = 16
-    LoadButton.BorderSizePixel = 0
-    Instance.new("UICorner", LoadButton).CornerRadius = UDim.new(0, 6) -- Smooth corners
-    
-    local LoadingBar = Instance.new("Frame", Frame)
-    LoadingBar.Size = UDim2.new(0, 0, 0, 5)
-    LoadingBar.Position = UDim2.new(0, 0, 1, -5)
-    LoadingBar.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-    LoadingBar.BorderSizePixel = 0
-    LoadingBar.Visible = false
-
-    local function startLoad()
-        local tween = TweenService:Create(LoadingBar, TweenInfo.new(5), { Size = UDim2.new(1, 0, 0, 5) })
-        LoadingBar.Visible = true
-        tween:Play()
-        tween.Completed:Wait()
-        ScreenGui:Destroy()
-        _G.InsaniXLoaded = true
-        loadstring(game:HttpGet(mainHubURL))()
-    end
-
-    local debounce = false
-    LoadButton.MouseButton1Click:Connect(function()
-        if debounce then return end
-        debounce = true
-        local key = KeyBox.Text
-        Status.Text = "Verifying..."
-        if verifyKey(key) then
-            Status.Text = "Key valid. Loading..."
-            saveKey(key)
-            startLoad()
-        else
-            Status.Text = "Invalid key. Try again."
-            task.delay(0.5, function() debounce = false end)
-        end
-    end)
-end
-
--- Auto path: try saved key first
-local existing = readSavedKey()
-if existing and verifyKey(existing) then
-    print("[InsaniX] Saved key found, loading main hub...")
-    _G.InsaniXLoaded = true
-    loadstring(game:HttpGet(mainHubURL))()
-else
-    print("[InsaniX] No saved key or invalid key, showing loader UI...")
-    showLoaderUI()
 end
