@@ -81,7 +81,7 @@ local function showLoaderUI()
     Status.Position = UDim2.new(0.05, 0, 0, 100)
     Status.Size = UDim2.new(0.9, 0, 0, 20)
     Status.Text = ""
-    Status.TextColor3 = Color3.fromRGB(0, 0, 0)
+    Status.TextColor3 = Color3.fromRGB(255, 255, 255)
     Status.BackgroundTransparency = 1
     Status.Font = Enum.Font.Gotham
     Status.TextSize = 14
@@ -92,7 +92,7 @@ local function showLoaderUI()
     LoadButton.Size = UDim2.new(0.9, 0, 0, 30)
     LoadButton.Position = UDim2.new(0.05, 0, 0, 130)
     LoadButton.BackgroundColor3 = Color3.fromRGB(30, 150, 255)
-    LoadButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    LoadButton.TextColor3 = Color3.fromRGB(0, 0, 0)
     LoadButton.Font = Enum.Font.GothamBold
     LoadButton.TextSize = 16
     LoadButton.BorderSizePixel = 0
