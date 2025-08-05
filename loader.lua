@@ -28,17 +28,40 @@ end
 
 -- Key Validation
 local function verifyKey(key)
-    local url = ("https://sellauth.gg/api/verify?key=%s&product=%s&hwid=%s"):format(key, productId, hwid)
-    local success, response = pcall(function()
-        return HttpService:JSONDecode(game:HttpGet(url))
+    key = tostring(key or ""):gsub("%s+", "") -- trim spaces/newlines
+
+    local url = ("https://sellauth.gg/api/verify?key=%s&product=%s&hwid=%s")
+        :format(HttpService:UrlEncode(key), HttpService:UrlEncode(productId), HttpService:UrlEncode(hwid))
+
+    local okHttp, body = pcall(function()
+        return game:HttpGet(url)
     end)
-    if success and response.success then
-        return true
-    else
-        warn("[InsaniX] Key validation failed:", response and response.message or "Unknown error")
+    if not okHttp then
+        warn("[InsaniX] HTTP error:", body)
         return false
     end
+
+    print("[InsaniX] Verify URL:", url)
+    print("[InsaniX] Raw response:", body)
+
+    local okJson, data = pcall(function() return HttpService:JSONDecode(body) end)
+    if not okJson then
+        warn("[InsaniX] JSON parse failed")
+        return false
+    end
+
+    -- Adjust these to whatever the API returns
+    if data.success == true or data.valid == true or data.status == "success" then
+        return true
+    end
+
+    -- Surface the exact reason
+    if data.message then warn("[InsaniX] Verify failed:", data.message) end
+    if data.reason then warn("[InsaniX] Reason:", data.reason) end
+
+    return false
 end
+
 
 -- Loader UI
 local function showLoaderUI()
