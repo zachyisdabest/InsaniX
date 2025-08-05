@@ -1,4 +1,4 @@
---// InsaniX Loader.lua (with Cloudflare Worker verification)
+--// InsaniX Loader.lua (with Cloudflare Worker verification + clean URL fix)
 
 -- Services
 local HttpService = game:GetService("HttpService")
@@ -9,8 +9,6 @@ local hwid = game:GetService("RbxAnalyticsService"):GetClientId()
 
 -- Config
 local savedKeyFile = "insanix_key.txt"
--- Product ID is not used client-side anymore (handled by your Worker), but kept for reference
-local productId = "395185"
 local mainHubURL = "https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/mainhub.lua"
 
 -- Proxy (Cloudflare Worker)
@@ -31,14 +29,15 @@ local function saveKey(key)
     end
 end
 
--- Key verification via Cloudflare Worker (proxies to Sellauth)
+-- Key verification via Cloudflare Worker
 local function verifyKey(key)
-    key = tostring(key or ""):gsub("%s+", "") -- trim spaces/newlines
+    key = tostring(key or ""):gsub("%s+", "") -- trim whitespace/newlines
     if key == "" then return false end
 
+    -- Remove trailing slash if any
     local base = workerURL
     if string.sub(base, -1) == "/" then
-        base = string.sub(base, 1, -2) -- remove trailing slash if any
+        base = string.sub(base, 1, -2)
     end
 
     local url = string.format(
@@ -69,25 +68,6 @@ local function verifyKey(key)
         return false
     end
 
-    if data.success == true or data.valid == true or data.status == "success" then
-        return true
-    end
-
-    if data.message then warn("[InsaniX] Verify failed:", data.mess
-
-
-    -- Debug
-    print("[InsaniX] Proxy response:", body)
-
-    local okJson, data = pcall(function()
-        return HttpService:JSONDecode(body)
-    end)
-    if not okJson then
-        warn("[InsaniX] JSON decode failed")
-        return false
-    end
-
-    -- Accept common success shapes from Sellauth
     if data.success == true or data.valid == true or data.status == "success" then
         return true
     end
