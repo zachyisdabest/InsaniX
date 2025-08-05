@@ -53,6 +53,7 @@ local function showLoaderUI()
     Frame.BorderSizePixel = 0
     Frame.Active = true
     Frame.Draggable = true
+    Instance.new("UICorner", topPanel).CornerRadius = UDim.new(0, 10)
 
     local Title = Instance.new("TextLabel", Frame)
     Title.Size = UDim2.new(1, 0, 0, 40)
@@ -72,6 +73,7 @@ local function showLoaderUI()
     KeyBox.TextColor3 = Color3.fromRGB(0, 0, 0)
     KeyBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     KeyBox.BorderSizePixel = 0
+    Instance.new("UICorner", topPanel).CornerRadius = UDim.new(0, 10)
 
     local Status = Instance.new("TextLabel", Frame)
     Status.Position = UDim2.new(0.05, 0, 0, 100)
@@ -91,6 +93,7 @@ local function showLoaderUI()
     LoadButton.Font = Enum.Font.GothamBold
     LoadButton.TextSize = 16
     LoadButton.BorderSizePixel = 0
+    Instance.new("UICorner", topPanel).CornerRadius = UDim.new(0, 10)
 
     local LoadingBar = Instance.new("Frame", Frame)
     LoadingBar.Size = UDim2.new(0, 0, 0, 5)
