@@ -46,14 +46,15 @@ local function showLoaderUI()
     ScreenGui.Name = "InsaniXLoader"
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
+    -- Frame
     local Frame = Instance.new("Frame", ScreenGui)
-    Instance.new("UICorner", topPanel).CornerRadius = UDim.new(0, 10)
     Frame.Size = UDim2.new(0, 300, 0, 180)
     Frame.Position = UDim2.new(0.5, -150, 0.5, -90)
     Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     Frame.BorderSizePixel = 0
     Frame.Active = true
     Frame.Draggable = true
+    Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 8) -- Smooth corners
     
     local Title = Instance.new("TextLabel", Frame)
     Title.Size = UDim2.new(1, 0, 0, 40)
@@ -63,8 +64,8 @@ local function showLoaderUI()
     Title.Font = Enum.Font.GothamBold
     Title.TextSize = 22
 
+    -- TextBox
     local KeyBox = Instance.new("TextBox", Frame)
-    Instance.new("UICorner", topPanel).CornerRadius = UDim.new(0, 10)
     KeyBox.PlaceholderText = "Enter License Key"
     KeyBox.Size = UDim2.new(0.9, 0, 0, 30)
     KeyBox.Position = UDim2.new(0.05, 0, 0, 60)
@@ -74,6 +75,7 @@ local function showLoaderUI()
     KeyBox.TextColor3 = Color3.fromRGB(0, 0, 0)
     KeyBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     KeyBox.BorderSizePixel = 0
+    Instance.new("UICorner", KeyBox).CornerRadius = UDim.new(0, 6) -- Smooth corners
 
     local Status = Instance.new("TextLabel", Frame)
     Status.Position = UDim2.new(0.05, 0, 0, 100)
@@ -84,8 +86,8 @@ local function showLoaderUI()
     Status.Font = Enum.Font.Gotham
     Status.TextSize = 14
 
+    -- Verify Key Button
     local LoadButton = Instance.new("TextButton", Frame)
-    Instance.new("UICorner", topPanel).CornerRadius = UDim.new(0, 10)
     LoadButton.Text = "Verify Key"
     LoadButton.Size = UDim2.new(0.9, 0, 0, 30)
     LoadButton.Position = UDim2.new(0.05, 0, 0, 130)
@@ -94,6 +96,7 @@ local function showLoaderUI()
     LoadButton.Font = Enum.Font.GothamBold
     LoadButton.TextSize = 16
     LoadButton.BorderSizePixel = 0
+    Instance.new("UICorner", LoadButton).CornerRadius = UDim.new(0, 6) -- Smooth corners
     
     local LoadingBar = Instance.new("Frame", Frame)
     LoadingBar.Size = UDim2.new(0, 0, 0, 5)
