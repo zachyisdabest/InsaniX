@@ -33,24 +33,48 @@ end
 
 -- Key verification via Cloudflare Worker (proxies to Sellauth)
 local function verifyKey(key)
-    key = tostring(key or ""):gsub("%s+", "") -- trim whitespace/newlines
+    key = tostring(key or ""):gsub("%s+", "") -- trim spaces/newlines
     if key == "" then return false end
 
-    local url = ("%s?key=%s&hwid=%s&token=%s")
-        :format(
-            workerURL,
-            HttpService:UrlEncode(key),
-            HttpService:UrlEncode(hwid),
-            HttpService:UrlEncode(workerToken)
-        )
+    local base = workerURL
+    if string.sub(base, -1) == "/" then
+        base = string.sub(base, 1, -2) -- remove trailing slash if any
+    end
+
+    local url = string.format(
+        "%s?key=%s&hwid=%s&token=%s",
+        base,
+        HttpService:UrlEncode(key),
+        HttpService:UrlEncode(hwid),
+        HttpService:UrlEncode(workerToken)
+    )
+
+    print("[InsaniX] Final request URL:", url) -- debug
 
     local okHttp, body = pcall(function()
-        return game:HttpGet(url) -- executors generally allow this; Roblox blocks sellauth.gg directly
+        return game:HttpGet(url)
     end)
     if not okHttp then
         warn("[InsaniX] HTTP error via proxy:", body)
         return false
     end
+
+    print("[InsaniX] Proxy response:", body)
+
+    local okJson, data = pcall(function()
+        return HttpService:JSONDecode(body)
+    end)
+    if not okJson then
+        warn("[InsaniX] JSON decode failed")
+        return false
+    end
+
+    if data.success == true or data.valid == true or data.status == "success" then
+        return true
+    end
+
+    if data.message then warn("[InsaniX] Verify failed:", data.mess
+
 
     -- Debug
     print("[InsaniX] Proxy response:", body)
