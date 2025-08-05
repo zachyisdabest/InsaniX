@@ -47,14 +47,14 @@ local function showLoaderUI()
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
     local Frame = Instance.new("Frame", ScreenGui)
+    Instance.new("UICorner", topPanel).CornerRadius = UDim.new(0, 10)
     Frame.Size = UDim2.new(0, 300, 0, 180)
     Frame.Position = UDim2.new(0.5, -150, 0.5, -90)
     Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     Frame.BorderSizePixel = 0
     Frame.Active = true
     Frame.Draggable = true
-    Instance.new("UICorner", topPanel).CornerRadius = UDim.new(0, 10)
-
+    
     local Title = Instance.new("TextLabel", Frame)
     Title.Size = UDim2.new(1, 0, 0, 40)
     Title.BackgroundTransparency = 1
@@ -64,6 +64,7 @@ local function showLoaderUI()
     Title.TextSize = 22
 
     local KeyBox = Instance.new("TextBox", Frame)
+    Instance.new("UICorner", topPanel).CornerRadius = UDim.new(0, 10)
     KeyBox.PlaceholderText = "Enter License Key"
     KeyBox.Size = UDim2.new(0.9, 0, 0, 30)
     KeyBox.Position = UDim2.new(0.05, 0, 0, 60)
@@ -73,7 +74,6 @@ local function showLoaderUI()
     KeyBox.TextColor3 = Color3.fromRGB(0, 0, 0)
     KeyBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     KeyBox.BorderSizePixel = 0
-    Instance.new("UICorner", topPanel).CornerRadius = UDim.new(0, 10)
 
     local Status = Instance.new("TextLabel", Frame)
     Status.Position = UDim2.new(0.05, 0, 0, 100)
@@ -85,6 +85,7 @@ local function showLoaderUI()
     Status.TextSize = 14
 
     local LoadButton = Instance.new("TextButton", Frame)
+    Instance.new("UICorner", topPanel).CornerRadius = UDim.new(0, 10)
     LoadButton.Text = "Verify Key"
     LoadButton.Size = UDim2.new(0.9, 0, 0, 30)
     LoadButton.Position = UDim2.new(0.05, 0, 0, 130)
@@ -93,8 +94,7 @@ local function showLoaderUI()
     LoadButton.Font = Enum.Font.GothamBold
     LoadButton.TextSize = 16
     LoadButton.BorderSizePixel = 0
-    Instance.new("UICorner", topPanel).CornerRadius = UDim.new(0, 10)
-
+    
     local LoadingBar = Instance.new("Frame", Frame)
     LoadingBar.Size = UDim2.new(0, 0, 0, 5)
     LoadingBar.Position = UDim2.new(0, 0, 1, -5)
