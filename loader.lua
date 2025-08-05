@@ -1,6 +1,46 @@
--- keep your existing requires and locals (HttpService, Players, etc.)
--- keep savedKeyFile, productId, mainHubURL, readSavedKey, saveKey, verifyKey, loadMainHub as-is
+--// Loader.lua for InsaniX
 
+-- Services
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local TweenService = game:GetService("TweenService")
+local hwid = game:GetService("RbxAnalyticsService"):GetClientId()
+
+-- Config
+local savedKeyFile = "insanix_key.txt"
+local productId = "565248" -- Your Sellauth product ID
+local mainHubURL = "https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/mainhub.lua"
+
+-- File Functions
+local function readSavedKey()
+    if isfile and isfile(savedKeyFile) then
+        return readfile(savedKeyFile)
+    end
+    return nil
+end
+
+local function saveKey(key)
+    if writefile then
+        writefile(savedKeyFile, key)
+    end
+end
+
+-- Key Validation
+local function verifyKey(key)
+    local url = ("https://sellauth.gg/api/verify?key=%s&product=%s&hwid=%s"):format(key, productId, hwid)
+    local success, response = pcall(function()
+        return HttpService:JSONDecode(game:HttpGet(url))
+    end)
+    if success and response.success then
+        return true
+    else
+        warn("[InsaniX] Key validation failed:", response and response.message or "Unknown error")
+        return false
+    end
+end
+
+-- Loader UI
 local function showLoaderUI()
     local ScreenGui = Instance.new("ScreenGui", gethui and gethui() or game.CoreGui)
     ScreenGui.Name = "InsaniXLoader"
@@ -52,7 +92,6 @@ local function showLoaderUI()
     LoadButton.TextSize = 16
     LoadButton.BorderSizePixel = 0
 
-    -- Loading bar
     local LoadingBar = Instance.new("Frame", Frame)
     LoadingBar.Size = UDim2.new(0, 0, 0, 5)
     LoadingBar.Position = UDim2.new(0, 0, 1, -5)
@@ -61,7 +100,6 @@ local function showLoaderUI()
     LoadingBar.Visible = false
 
     local function startLoad()
-        local TweenService = game:GetService("TweenService")
         local tween = TweenService:Create(LoadingBar, TweenInfo.new(5), { Size = UDim2.new(1, 0, 0, 5) })
         LoadingBar.Visible = true
         tween:Play()
@@ -88,13 +126,13 @@ local function showLoaderUI()
     end)
 end
 
--- AUTO PATH: try saved key first (no UI if valid)
+-- Auto path: try saved key first
 local existing = readSavedKey()
 if existing and verifyKey(existing) then
-    -- no UI shown; just load
+    print("[InsaniX] Saved key found, loading main hub...")
     _G.InsaniXLoaded = true
     loadstring(game:HttpGet(mainHubURL))()
 else
-    -- show the key UI only if needed
+    print("[InsaniX] No saved key or invalid key, showing loader UI...")
     showLoaderUI()
 end
