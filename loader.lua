@@ -1,4 +1,4 @@
---// InsaniX Loader.lua (with Cloudflare Worker verification + clean URL fix)
+--// InsaniX Loader.lua (Executor Ready)
 
 -- Services
 local HttpService = game:GetService("HttpService")
@@ -12,10 +12,10 @@ local savedKeyFile = "insanix_key.txt"
 local mainHubURL = "https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/mainhub.lua"
 
 -- Proxy (Cloudflare Worker)
-local workerURL = "https://insanix-verify.friendlycripp.workers.dev"
+local workerURL = "https://insanix-verify.friendlycripp.workers.dev" -- no trailing slash
 local workerToken = "InsaniXequalfadi"
 
--- File helpers
+-- File helpers (executor functions)
 local function readSavedKey()
     if isfile and isfile(savedKeyFile) then
         return readfile(savedKeyFile)
@@ -31,24 +31,24 @@ end
 
 -- Key verification via Cloudflare Worker
 local function verifyKey(key)
-    key = tostring(key or ""):gsub("%s+", "") -- trim whitespace/newlines
+    key = tostring(key or ""):gsub("^%s*(.-)%s*$", "%1") -- trim
     if key == "" then return false end
 
-    -- Remove trailing slash if any
-    local base = workerURL
+    local base = tostring(workerURL or ""):gsub("^%s*(.-)%s*$", "%1")
     if string.sub(base, -1) == "/" then
         base = string.sub(base, 1, -2)
     end
 
+    -- No UrlEncode — send raw
     local url = string.format(
         "%s?key=%s&hwid=%s&token=%s",
         base,
-        HttpService:UrlEncode(key),
-        HttpService:UrlEncode(hwid),
-        HttpService:UrlEncode(workerToken)
+        key,
+        hwid,
+        workerToken
     )
 
-    print("[InsaniX] Final request URL:", url) -- debug
+    print("[InsaniX] Final request URL:", url)
 
     local okHttp, body = pcall(function()
         return game:HttpGet(url)
@@ -67,6 +67,16 @@ local function verifyKey(key)
         warn("[InsaniX] JSON decode failed")
         return false
     end
+
+    if data.success == true or data.valid == true or data.status == "success" then
+        return true
+    end
+
+    if data.message then warn("[InsaniX] Verify failed:", data.message) end
+    if data.reason then warn("[InsaniX] Reason:", data.reason) end
+    return false
+end
+
 
     if data.success == true or data.valid == true or data.status == "success" then
         return true
