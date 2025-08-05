@@ -1,6 +1,6 @@
 -- put near your other config
-local workerURL = "https://insanix-verify.yourname.workers.dev"  -- <-- your worker
-local workerToken = "insanix-SECRET-123"                         -- <-- same TOKEN you set in CF
+local workerURL = "https://insanix-verify.friendlycripp.workers.dev/"  -- <-- your worker
+local workerToken = "InsaniXequalfadi"                         -- <-- same TOKEN you set in CF
 
 local function verifyKey(key)
     key = tostring(key or ""):gsub("%s+", "") -- trim spaces/newlines
