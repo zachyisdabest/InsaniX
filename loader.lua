@@ -1,15 +1,14 @@
---// Services
+--// Loader.lua - InsaniX
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local hwid = game:GetService("RbxAnalyticsService"):GetClientId()
 
---// Config
 local savedKeyFile = "insanix_key.txt"
-local replitAPI = "https://03df6bdd-28f6-44f5-b766-5bf63d614ed5-00-22hauxpzzfxdx.janeway.replit.dev/check?key=%s&hwid=%s"
+local replitBaseURL = "https://03df6bdd-28f6-44f5-b766-5bf63d614ed5-00-22hauxpzzfxdx.janeway.replit.dev"
 local mainHubURL = "https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/mainhub.lua"
 
---// File Functions
+--// Read saved key
 local function readSavedKey()
     if isfile and isfile(savedKeyFile) then
         return readfile(savedKeyFile)
@@ -17,111 +16,109 @@ local function readSavedKey()
     return nil
 end
 
+--// Save key
 local function saveKey(key)
     if writefile then
         writefile(savedKeyFile, key)
     end
 end
 
---// Key Verification
+--// Verify key via Replit API
 local function verifyKey(key)
-    local url = string.format(replitAPI, key, hwid)
+    local url = string.format("%s/check?key=%s&hwid=%s", replitBaseURL, key, hwid)
     local success, result = pcall(function()
         return game:HttpGet(url)
     end)
-
-    if success then
-        local data = HttpService:JSONDecode(result)
-        return data.success == true
+    if not success then
+        warn("[InsaniX] HTTP Request Failed:", result)
+        return false
     end
-    return false
+    local ok, data = pcall(function()
+        return HttpService:JSONDecode(result)
+    end)
+    if not ok then
+        warn("[InsaniX] JSON Decode Failed:", data)
+        return false
+    end
+    return data.success == true
 end
 
---// Load Main Hub
+--// Load MainHub
 local function loadMainHub()
-    _G.InsaniXLoaded = true
     loadstring(game:HttpGet(mainHubURL))()
 end
 
---// Check Existing Key
-local existing = readSavedKey()
-if existing and verifyKey(existing) then
-    loadMainHub()
-    return
-end
+--// UI for entering key
+local function showKeyUI()
+    local gui = Instance.new("ScreenGui", gethui and gethui() or game.CoreGui)
+    gui.Name = "InsaniXLoader"
+    gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
---// Loader UI
-local function showLoaderUI()
-    local ScreenGui = Instance.new("ScreenGui", gethui and gethui() or game.CoreGui)
-    ScreenGui.Name = "InsaniXLoader"
-    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    local frame = Instance.new("Frame", gui)
+    frame.Size = UDim2.new(0, 300, 0, 180)
+    frame.Position = UDim2.new(0.5, -150, 0.5, -90)
+    frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    frame.Active = true
+    frame.Draggable = true
 
-    local Frame = Instance.new("Frame", ScreenGui)
-    Frame.Size = UDim2.new(0, 300, 0, 180)
-    Frame.Position = UDim2.new(0.5, -150, 0.5, -90)
-    Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    Frame.BorderSizePixel = 0
-    Frame.Active = true
-    Frame.Draggable = true
-    Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 10)
+    local corner = Instance.new("UICorner", frame)
+    corner.CornerRadius = UDim.new(0, 8)
 
-    local Title = Instance.new("TextLabel", Frame)
-    Title.Size = UDim2.new(1, 0, 0, 40)
-    Title.BackgroundTransparency = 1
-    Title.Text = "InsaniX Loader"
-    Title.TextColor3 = Color3.fromRGB(0, 0, 0)
-    Title.Font = Enum.Font.GothamBold
-    Title.TextSize = 22
+    local title = Instance.new("TextLabel", frame)
+    title.Size = UDim2.new(1, 0, 0, 40)
+    title.BackgroundTransparency = 1
+    title.Text = "InsaniX Loader"
+    title.TextColor3 = Color3.fromRGB(0, 0, 0)
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 22
 
-    local KeyBox = Instance.new("TextBox", Frame)
-    KeyBox.PlaceholderText = "Enter License Key"
-    KeyBox.Size = UDim2.new(0.9, 0, 0, 30)
-    KeyBox.Position = UDim2.new(0.05, 0, 0, 60)
-    KeyBox.Text = ""
-    KeyBox.Font = Enum.Font.Gotham
-    KeyBox.TextSize = 16
-    KeyBox.TextColor3 = Color3.fromRGB(0, 0, 0)
-    KeyBox.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
-    KeyBox.BorderSizePixel = 0
-    Instance.new("UICorner", KeyBox).CornerRadius = UDim.new(0, 6)
+    local keyBox = Instance.new("TextBox", frame)
+    keyBox.PlaceholderText = "Enter License Key"
+    keyBox.Size = UDim2.new(0.9, 0, 0, 30)
+    keyBox.Position = UDim2.new(0.05, 0, 0, 60)
+    keyBox.Text = ""
+    keyBox.Font = Enum.Font.Gotham
+    keyBox.TextSize = 16
+    keyBox.TextColor3 = Color3.fromRGB(0, 0, 0)
+    keyBox.BackgroundColor3 = Color3.fromRGB(230, 230, 230)
+    Instance.new("UICorner", keyBox).CornerRadius = UDim.new(0, 6)
 
-    local Status = Instance.new("TextLabel", Frame)
-    Status.Position = UDim2.new(0.05, 0, 0, 100)
-    Status.Size = UDim2.new(0.9, 0, 0, 20)
-    Status.Text = ""
-    Status.TextColor3 = Color3.fromRGB(0, 0, 0)
-    Status.BackgroundTransparency = 1
-    Status.Font = Enum.Font.Gotham
-    Status.TextSize = 14
+    local status = Instance.new("TextLabel", frame)
+    status.Position = UDim2.new(0.05, 0, 0, 100)
+    status.Size = UDim2.new(0.9, 0, 0, 20)
+    status.Text = ""
+    status.TextColor3 = Color3.fromRGB(0, 0, 0)
+    status.BackgroundTransparency = 1
+    status.Font = Enum.Font.Gotham
+    status.TextSize = 14
 
-    local LoadButton = Instance.new("TextButton", Frame)
-    LoadButton.Text = "Verify Key"
-    LoadButton.Size = UDim2.new(0.9, 0, 0, 30)
-    LoadButton.Position = UDim2.new(0.05, 0, 0, 130)
-    LoadButton.BackgroundColor3 = Color3.fromRGB(30, 150, 255)
-    LoadButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    LoadButton.Font = Enum.Font.GothamBold
-    LoadButton.TextSize = 16
-    LoadButton.BorderSizePixel = 0
-    Instance.new("UICorner", LoadButton).CornerRadius = UDim.new(0, 6)
+    local loadBtn = Instance.new("TextButton", frame)
+    loadBtn.Text = "Verify Key"
+    loadBtn.Size = UDim2.new(0.9, 0, 0, 30)
+    loadBtn.Position = UDim2.new(0.05, 0, 0, 130)
+    loadBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+    loadBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    loadBtn.Font = Enum.Font.GothamBold
+    loadBtn.TextSize = 16
+    Instance.new("UICorner", loadBtn).CornerRadius = UDim.new(0, 6)
 
-    local debounce = false
-    LoadButton.MouseButton1Click:Connect(function()
-        if debounce then return end
-        debounce = true
-        local key = KeyBox.Text
-        Status.Text = "Verifying..."
+    loadBtn.MouseButton1Click:Connect(function()
+        local key = keyBox.Text
         if verifyKey(key) then
-            Status.Text = "Key valid. Loading..."
+            status.Text = "Key valid. Loading..."
             saveKey(key)
-            task.wait(1)
-            ScreenGui:Destroy()
+            gui:Destroy()
             loadMainHub()
         else
-            Status.Text = "Invalid key. Try again."
-            task.delay(0.5, function() debounce = false end)
+            status.Text = "Invalid key."
         end
     end)
 end
 
-showLoaderUI()
+--// Main check
+local existingKey = readSavedKey()
+if existingKey and verifyKey(existingKey) then
+    loadMainHub()
+else
+    showKeyUI()
+end
