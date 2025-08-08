@@ -6,7 +6,7 @@ local hwid = game:GetService("RbxAnalyticsService"):GetClientId()
 
 --// Config
 local savedKeyFile = "insanix_key.txt"
-local replitAPI = "https://03df6bdd-28f6-44f5-b766-5bf63d614ed5-00-22hauxpzzfxdx.janeway.replit.dev"
+local replitAPI = "https://03df6bdd-28f6-44f5-b766-5bf63d614ed5-00-22hauxpzzfxdx.janeway.replit.dev/check?key=%s&hwid=%s"
 local mainHubURL = "https://raw.githubusercontent.com/zachyisdabest/InsaniX/main/mainhub.lua"
 
 --// File Functions
